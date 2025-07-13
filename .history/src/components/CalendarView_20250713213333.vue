@@ -14,21 +14,13 @@
         Début des règles : {{ selectedDates[0].toLocaleDateString() }}
       </p>
       <p>
-        <span class="dot green"></span>
-        Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
-      </p>
-      <p>
         <span class="dot pink"></span>
         Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
       </p>
-    </div>
-
-    <div
-      v-if="userHasChangedCycle"
-      class="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-yellow-800"
-    >
-      ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
-      <strong>{{ cycleDuration }}</strong> jours.
+      <p>
+        <span class="dot green"></span>
+        Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
+      </p>
     </div>
 
     <div class="mt-4 text-right">
@@ -48,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { db, auth } from '../firebase'
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore'
 
@@ -57,8 +49,6 @@ const calendarAttributes = ref([])
 const isSaving = ref(false)
 const showSettings = ref(false)
 const cycleDuration = ref(28) // Valeur par défaut
-const previousCycleDuration = ref(28)
-const userHasChangedCycle = ref(false)
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -171,16 +161,7 @@ const onDayClick = async ({ date }) => {
   }
 }
 
-watch(cycleDuration, (newVal, oldVal) => {
-  if (selectedDates.value.length && newVal !== oldVal) {
-    userHasChangedCycle.value = true
-    previousCycleDuration.value = oldVal
-  }
-})
-
-onMounted(() => {
-  loadPeriods()
-})
+onMounted(loadPeriods)
 </script>
 
 <style>
@@ -189,7 +170,7 @@ onMounted(() => {
   width: 12px;
   display: inline-block;
   border-radius: 50%;
-  margin-right: 6px;
+  margin-right: 12px;
 }
 .red {
   background-color: red;

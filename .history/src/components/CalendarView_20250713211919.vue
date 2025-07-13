@@ -14,21 +14,13 @@
         Début des règles : {{ selectedDates[0].toLocaleDateString() }}
       </p>
       <p>
-        <span class="dot green"></span>
-        Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
-      </p>
-      <p>
         <span class="dot pink"></span>
         Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
       </p>
-    </div>
-
-    <div
-      v-if="userHasChangedCycle"
-      class="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-yellow-800"
-    >
-      ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
-      <strong>{{ cycleDuration }}</strong> jours.
+      <p>
+        <span class="dot green"></span>
+        Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
+      </p>
     </div>
 
     <div class="mt-4 text-right">
@@ -36,8 +28,8 @@
     </div>
 
     <div v-if="showSettings" class="mt-2">
-      <label>
-        Durée du cycle (jours) :
+      <label
+        >Durée du cycle (jours) :
         <input type="number" v-model.number="cycleDuration" min="20" max="40" />
       </label>
       <p class="text-sm text-gray-500">
@@ -48,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { db, auth } from '../firebase'
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore'
 
@@ -57,8 +49,6 @@ const calendarAttributes = ref([])
 const isSaving = ref(false)
 const showSettings = ref(false)
 const cycleDuration = ref(28) // Valeur par défaut
-const previousCycleDuration = ref(28)
-const userHasChangedCycle = ref(false)
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -69,6 +59,8 @@ const loadPeriods = async () => {
     const q = query(periodsCollectionRef, orderBy('createdAt', 'desc'))
     const snapshot = await getDocs(q)
     const periods = snapshot.docs.map((doc) => doc.data())
+
+    const newAttributes = []
 
     if (periods.length > 0) {
       const latest = periods[0]
@@ -83,49 +75,41 @@ const loadPeriods = async () => {
       selectedDates.value = [startDate, predictedDate, ovulationDate]
     }
 
-    const referenceDate = selectedDates.value[0] || new Date()
-
-    const newAttributes = periods.flatMap((period, i) => {
+    periods.forEach((period, i) => {
       const startDate = new Date(period.startDate)
       const predictedDate = new Date(period.predictedDate)
       const ovulationDate = new Date(startDate)
       const cycleDays = Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24))
       ovulationDate.setDate(startDate.getDate() + Math.floor(cycleDays / 2))
 
-      const isPast = startDate < referenceDate
+      const lastClickedDate = selectedDates.value[0] // date du dernier clic enregistré
+      const isPast = startDate < lastClickedDate
+      const baseOpacity = isPast ? 0.3 : 1
 
-      return [
+      const now = new Date()
+      const past = now > predictedDate
+      const opacity = past ? 0.3 : 1
+
+      newAttributes.push(
         {
           key: `rules-${i}`,
           dates: [startDate],
-          highlight: {
-            color: 'red',
-            fillMode: 'solid',
-            contentClass: isPast ? 'past-opacity' : '',
-          },
+          highlight: { color: 'red', fillMode: 'solid', opacity: baseOpacity },
           popover: { label: 'Début des règles' },
         },
         {
           key: `prediction-${i}`,
           dates: [predictedDate],
-          highlight: {
-            color: 'pink',
-            fillMode: 'outline',
-            contentClass: isPast ? 'past-opacity' : '',
-          },
+          highlight: { color: 'pink', fillMode: 'outline', opacity: baseOpacity },
           popover: { label: 'Prochaines règles estimées' },
         },
         {
           key: `ovulation-${i}`,
           dates: [ovulationDate],
-          highlight: {
-            color: 'green',
-            fillMode: 'solid',
-            contentClass: isPast ? 'past-opacity' : '',
-          },
+          highlight: { color: 'green', fillMode: 'solid', opacity: baseOpacity },
           popover: { label: 'Ovulation maximale' },
         },
-      ]
+      )
     })
 
     calendarAttributes.value = newAttributes
@@ -171,16 +155,7 @@ const onDayClick = async ({ date }) => {
   }
 }
 
-watch(cycleDuration, (newVal, oldVal) => {
-  if (selectedDates.value.length && newVal !== oldVal) {
-    userHasChangedCycle.value = true
-    previousCycleDuration.value = oldVal
-  }
-})
-
-onMounted(() => {
-  loadPeriods()
-})
+onMounted(loadPeriods)
 </script>
 
 <style>
@@ -199,8 +174,5 @@ onMounted(() => {
 }
 .green {
   background-color: green;
-}
-.past-opacity {
-  opacity: 0.3 !important;
 }
 </style>

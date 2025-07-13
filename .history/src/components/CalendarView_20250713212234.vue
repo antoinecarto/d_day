@@ -14,21 +14,13 @@
         Début des règles : {{ selectedDates[0].toLocaleDateString() }}
       </p>
       <p>
-        <span class="dot green"></span>
-        Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
-      </p>
-      <p>
         <span class="dot pink"></span>
         Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
       </p>
-    </div>
-
-    <div
-      v-if="userHasChangedCycle"
-      class="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-yellow-800"
-    >
-      ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
-      <strong>{{ cycleDuration }}</strong> jours.
+      <p>
+        <span class="dot green"></span>
+        Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
+      </p>
     </div>
 
     <div class="mt-4 text-right">
@@ -48,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { db, auth } from '../firebase'
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore'
 
@@ -56,9 +48,7 @@ const selectedDates = ref([])
 const calendarAttributes = ref([])
 const isSaving = ref(false)
 const showSettings = ref(false)
-const cycleDuration = ref(28) // Valeur par défaut
-const previousCycleDuration = ref(28)
-const userHasChangedCycle = ref(false)
+const cycleDuration = ref(28) // valeur par défaut
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -70,38 +60,39 @@ const loadPeriods = async () => {
     const snapshot = await getDocs(q)
     const periods = snapshot.docs.map((doc) => doc.data())
 
+    const newAttributes = []
+
     if (periods.length > 0) {
       const latest = periods[0]
       const startDate = new Date(latest.startDate)
       const predictedDate = new Date(latest.predictedDate)
       const ovulationDate = new Date(startDate)
       ovulationDate.setDate(
-        startDate.getDate() +
-          Math.floor((predictedDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) / 2),
+        startDate.getDate() + Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24) / 2),
       )
 
       selectedDates.value = [startDate, predictedDate, ovulationDate]
     }
 
-    const referenceDate = selectedDates.value[0] || new Date()
+    const referenceDate = selectedDates.value[0] ?? new Date(0)
 
-    const newAttributes = periods.flatMap((period, i) => {
+    periods.forEach((period, i) => {
       const startDate = new Date(period.startDate)
       const predictedDate = new Date(period.predictedDate)
       const ovulationDate = new Date(startDate)
       const cycleDays = Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24))
       ovulationDate.setDate(startDate.getDate() + Math.floor(cycleDays / 2))
 
-      const isPast = startDate < referenceDate
+      const opacity = startDate < referenceDate ? 0.3 : 1
 
-      return [
+      newAttributes.push(
         {
           key: `rules-${i}`,
           dates: [startDate],
           highlight: {
             color: 'red',
             fillMode: 'solid',
-            contentClass: isPast ? 'past-opacity' : '',
+            opacity,
           },
           popover: { label: 'Début des règles' },
         },
@@ -111,7 +102,7 @@ const loadPeriods = async () => {
           highlight: {
             color: 'pink',
             fillMode: 'outline',
-            contentClass: isPast ? 'past-opacity' : '',
+            opacity,
           },
           popover: { label: 'Prochaines règles estimées' },
         },
@@ -121,11 +112,11 @@ const loadPeriods = async () => {
           highlight: {
             color: 'green',
             fillMode: 'solid',
-            contentClass: isPast ? 'past-opacity' : '',
+            opacity,
           },
           popover: { label: 'Ovulation maximale' },
         },
-      ]
+      )
     })
 
     calendarAttributes.value = newAttributes
@@ -171,16 +162,7 @@ const onDayClick = async ({ date }) => {
   }
 }
 
-watch(cycleDuration, (newVal, oldVal) => {
-  if (selectedDates.value.length && newVal !== oldVal) {
-    userHasChangedCycle.value = true
-    previousCycleDuration.value = oldVal
-  }
-})
-
-onMounted(() => {
-  loadPeriods()
-})
+onMounted(loadPeriods)
 </script>
 
 <style>
@@ -199,8 +181,5 @@ onMounted(() => {
 }
 .green {
   background-color: green;
-}
-.past-opacity {
-  opacity: 0.3 !important;
 }
 </style>

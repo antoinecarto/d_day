@@ -14,21 +14,13 @@
         Début des règles : {{ selectedDates[0].toLocaleDateString() }}
       </p>
       <p>
+        <span class="dot" :style="{ backgroundColor: predIsPerfect ? 'blue' : 'pink' }"></span>
+        Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
+      </p>
+      <p>
         <span class="dot green"></span>
         Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
       </p>
-      <p>
-        <span class="dot pink"></span>
-        Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
-      </p>
-    </div>
-
-    <div
-      v-if="userHasChangedCycle"
-      class="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-yellow-800"
-    >
-      ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
-      <strong>{{ cycleDuration }}</strong> jours.
     </div>
 
     <div class="mt-4 text-right">
@@ -36,8 +28,8 @@
     </div>
 
     <div v-if="showSettings" class="mt-2">
-      <label>
-        Durée du cycle (jours) :
+      <label
+        >Durée du cycle (jours) :
         <input type="number" v-model.number="cycleDuration" min="20" max="40" />
       </label>
       <p class="text-sm text-gray-500">
@@ -48,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { db, auth } from '../firebase'
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore'
 
@@ -57,8 +49,10 @@ const calendarAttributes = ref([])
 const isSaving = ref(false)
 const showSettings = ref(false)
 const cycleDuration = ref(28) // Valeur par défaut
-const previousCycleDuration = ref(28)
-const userHasChangedCycle = ref(false)
+
+// Flag qui indique si la prédiction est confirmée
+const predIsPerfect = ref(false)
+const perfectPredDate = ref(null)
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -70,62 +64,91 @@ const loadPeriods = async () => {
     const snapshot = await getDocs(q)
     const periods = snapshot.docs.map((doc) => doc.data())
 
+    const newAttributes = []
+
     if (periods.length > 0) {
       const latest = periods[0]
       const startDate = new Date(latest.startDate)
       const predictedDate = new Date(latest.predictedDate)
       const ovulationDate = new Date(startDate)
-      ovulationDate.setDate(
-        startDate.getDate() +
-          Math.floor((predictedDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) / 2),
+      const cycleDays = Math.floor(
+        (predictedDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
       )
-
-      selectedDates.value = [startDate, predictedDate, ovulationDate]
-    }
-
-    const referenceDate = selectedDates.value[0] || new Date()
-
-    const newAttributes = periods.flatMap((period, i) => {
-      const startDate = new Date(period.startDate)
-      const predictedDate = new Date(period.predictedDate)
-      const ovulationDate = new Date(startDate)
-      const cycleDays = Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24))
       ovulationDate.setDate(startDate.getDate() + Math.floor(cycleDays / 2))
 
-      const isPast = startDate < referenceDate
+      selectedDates.value = [startDate, predictedDate, ovulationDate]
 
-      return [
+      // Reset flag si on recharge périodes
+      predIsPerfect.value = false
+      perfectPredDate.value = null
+    }
+
+    periods.forEach((period, i) => {
+      const startDate = new Date(period.startDate)
+      const predictedDate = new Date(period.predictedDate)
+      const cycleDays = Math.floor(
+        (predictedDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+      )
+      const ovulationDate = new Date(startDate)
+      ovulationDate.setDate(startDate.getDate() + Math.floor(cycleDays / 2))
+
+      // Détermine si la date est passée par rapport à aujourd'hui
+      const now = new Date()
+      const isPastStart = startDate < now
+      const isPastPrediction = predictedDate < now
+      const isPastOvulation = ovulationDate < now
+
+      // Couleurs et opacités
+      newAttributes.push(
         {
-          key: `rules-${i}`,
-          dates: [startDate],
+          key: `start-${i}`,
+          dates: startDate,
           highlight: {
-            color: 'red',
+            backgroundColor: isPastStart ? 'rgba(255,0,0,0.3)' : 'red',
             fillMode: 'solid',
-            contentClass: isPast ? 'past-opacity' : '',
+          },
+          dot: {
+            color: isPastStart ? '#ff9999' : 'red',
           },
           popover: { label: 'Début des règles' },
         },
         {
           key: `prediction-${i}`,
-          dates: [predictedDate],
+          dates: predictedDate,
           highlight: {
-            color: 'pink',
-            fillMode: 'outline',
-            contentClass: isPast ? 'past-opacity' : '',
+            backgroundColor:
+              predIsPerfect.value &&
+              perfectPredDate.value?.toDateString() === predictedDate.toDateString()
+                ? 'rgba(0,0,255,0.3)'
+                : isPastPrediction
+                  ? 'rgba(255,192,203,0.3)'
+                  : 'pink',
+            fillMode: 'solid',
+          },
+          dot: {
+            color:
+              predIsPerfect.value &&
+              perfectPredDate.value?.toDateString() === predictedDate.toDateString()
+                ? 'blue'
+                : isPastPrediction
+                  ? '#f7c4d4'
+                  : 'pink',
           },
           popover: { label: 'Prochaines règles estimées' },
         },
         {
           key: `ovulation-${i}`,
-          dates: [ovulationDate],
+          dates: ovulationDate,
           highlight: {
-            color: 'green',
+            backgroundColor: isPastOvulation ? 'rgba(0,128,0,0.3)' : 'green',
             fillMode: 'solid',
-            contentClass: isPast ? 'past-opacity' : '',
+          },
+          dot: {
+            color: isPastOvulation ? '#a3d9a5' : 'green',
           },
           popover: { label: 'Ovulation maximale' },
         },
-      ]
+      )
     })
 
     calendarAttributes.value = newAttributes
@@ -144,7 +167,24 @@ const onDayClick = async ({ date }) => {
     return
   }
 
+  const clickedDate = new Date(date)
+  clickedDate.setHours(0, 0, 0, 0)
+
+  // Vérifie si le clic est sur une prédiction existante
+  if (
+    selectedDates.value.length >= 2 &&
+    clickedDate.toDateString() === selectedDates.value[1].toDateString()
+  ) {
+    // Valide visuellement la prédiction
+    predIsPerfect.value = true
+    perfectPredDate.value = clickedDate
+    isSaving.value = false
+    return
+  }
+
+  // Sinon, c'est un nouveau début de règles
   const start = new Date(date)
+  start.setHours(0, 0, 0, 0)
   const prediction = new Date(start)
   prediction.setDate(start.getDate() + cycleDuration.value)
   const ovulation = new Date(start)
@@ -153,7 +193,9 @@ const onDayClick = async ({ date }) => {
   try {
     const periodsCollectionRef = collection(db, 'users', user.uid, 'periods')
     const snapshot = await getDocs(periodsCollectionRef)
-    const exists = snapshot.docs.some((doc) => doc.data().startDate === start.toISOString())
+    const exists = snapshot.docs.some(
+      (doc) => new Date(doc.data().startDate).toDateString() === start.toDateString(),
+    )
 
     if (!exists) {
       await addDoc(periodsCollectionRef, {
@@ -171,16 +213,7 @@ const onDayClick = async ({ date }) => {
   }
 }
 
-watch(cycleDuration, (newVal, oldVal) => {
-  if (selectedDates.value.length && newVal !== oldVal) {
-    userHasChangedCycle.value = true
-    previousCycleDuration.value = oldVal
-  }
-})
-
-onMounted(() => {
-  loadPeriods()
-})
+onMounted(loadPeriods)
 </script>
 
 <style>
@@ -199,8 +232,5 @@ onMounted(() => {
 }
 .green {
   background-color: green;
-}
-.past-opacity {
-  opacity: 0.3 !important;
 }
 </style>

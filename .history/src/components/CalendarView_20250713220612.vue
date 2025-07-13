@@ -23,14 +23,6 @@
       </p>
     </div>
 
-    <div
-      v-if="userHasChangedCycle"
-      class="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-yellow-800"
-    >
-      ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
-      <strong>{{ cycleDuration }}</strong> jours.
-    </div>
-
     <div class="mt-4 text-right">
       <button @click="showSettings = !showSettings">⚙️ Paramètres</button>
     </div>
@@ -48,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { db, auth } from '../firebase'
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore'
 
@@ -57,8 +49,6 @@ const calendarAttributes = ref([])
 const isSaving = ref(false)
 const showSettings = ref(false)
 const cycleDuration = ref(28) // Valeur par défaut
-const previousCycleDuration = ref(28)
-const userHasChangedCycle = ref(false)
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -81,6 +71,22 @@ const loadPeriods = async () => {
       )
 
       selectedDates.value = [startDate, predictedDate, ovulationDate]
+
+      // Mise à jour dynamique du cycleDuration (moyenne des derniers cycles)
+      const durations = periods
+        .slice(0, 5)
+        .map((p) => {
+          const start = new Date(p.startDate)
+          const predicted = new Date(p.predictedDate)
+          return (predicted - start) / (1000 * 60 * 60 * 24)
+        })
+        .filter((n) => !isNaN(n))
+
+      if (durations.length > 0) {
+        const avg = Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+        cycleDuration.value = avg
+        console.log('Cycle moyen recalculé:', avg)
+      }
     }
 
     const referenceDate = selectedDates.value[0] || new Date()
@@ -153,12 +159,21 @@ const onDayClick = async ({ date }) => {
   try {
     const periodsCollectionRef = collection(db, 'users', user.uid, 'periods')
     const snapshot = await getDocs(periodsCollectionRef)
-    const exists = snapshot.docs.some((doc) => doc.data().startDate === start.toISOString())
+    const periods = snapshot.docs.map((doc) => doc.data())
+    const exists = periods.some((p) => p.startDate === start.toISOString())
+
+    // Cherche la prédiction précédente si disponible
+    const previousPrediction = periods.length > 0 ? new Date(periods[0].predictedDate) : null
+    const diffInDays = previousPrediction
+      ? Math.round((start - previousPrediction) / (1000 * 60 * 60 * 24))
+      : null
 
     if (!exists) {
       await addDoc(periodsCollectionRef, {
         startDate: start.toISOString(),
         predictedDate: prediction.toISOString(),
+        actualStartDate: start.toISOString(),
+        predictionDelta: diffInDays,
         createdAt: new Date().toISOString(),
       })
     }
@@ -171,16 +186,7 @@ const onDayClick = async ({ date }) => {
   }
 }
 
-watch(cycleDuration, (newVal, oldVal) => {
-  if (selectedDates.value.length && newVal !== oldVal) {
-    userHasChangedCycle.value = true
-    previousCycleDuration.value = oldVal
-  }
-})
-
-onMounted(() => {
-  loadPeriods()
-})
+onMounted(loadPeriods)
 </script>
 
 <style>
