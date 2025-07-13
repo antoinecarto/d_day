@@ -55,7 +55,6 @@ const calendarAttributes = ref([])
 const isSaving = ref(false)
 const cycleLength = ref(28)
 const showSettings = ref(false)
-const nextOvulationDate = ref(null)
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -76,7 +75,6 @@ const loadPeriods = async () => {
       ovulation.setDate(start.getDate() + Math.floor(cycleDays / 2))
 
       selectedDates.value = [start, prediction, ovulation]
-      nextOvulationDate.value = ovulation
     }
 
     const newAttributes = []

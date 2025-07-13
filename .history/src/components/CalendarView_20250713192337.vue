@@ -76,7 +76,6 @@ const loadPeriods = async () => {
       ovulation.setDate(start.getDate() + Math.floor(cycleDays / 2))
 
       selectedDates.value = [start, prediction, ovulation]
-      nextOvulationDate.value = ovulation
     }
 
     const newAttributes = []

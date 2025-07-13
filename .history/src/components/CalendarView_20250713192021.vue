@@ -18,12 +18,13 @@
       </p>
     </div>
 
-    <!-- Roue en bas à droite -->
-    <div class="fixed bottom-4 right-4">
-      <button @click="showSettings = !showSettings" title="Paramètres">⚙️ Paramètres</button>
+    <div class="mt-6">
+      <button @click="showSettings = !showSettings" class="text-blue-600 underline">
+        Paramètres du cycle
+      </button>
     </div>
 
-    <div v-if="showSettings" class="mt-4 p-4 border rounded bg-gray-100">
+    <div v-if="showSettings" class="mt-2">
       <label for="cycleLength" class="block text-sm font-medium text-gray-700">
         Durée du cycle (en jours)
       </label>
@@ -35,12 +36,6 @@
         min="15"
         max="60"
       />
-
-      <div class="mt-4 text-sm">
-        <p><strong>Prochaine ovulation estimée :</strong></p>
-        <p v-if="selectedDates.length">{{ nextOvulationDate?.toLocaleDateString() }}</p>
-        <p v-else class="italic text-gray-500">Aucune donnée disponible</p>
-      </div>
     </div>
   </div>
 </template>
@@ -55,7 +50,6 @@ const calendarAttributes = ref([])
 const isSaving = ref(false)
 const cycleLength = ref(28)
 const showSettings = ref(false)
-const nextOvulationDate = ref(null)
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -76,7 +70,6 @@ const loadPeriods = async () => {
       ovulation.setDate(start.getDate() + Math.floor(cycleDays / 2))
 
       selectedDates.value = [start, prediction, ovulation]
-      nextOvulationDate.value = ovulation
     }
 
     const newAttributes = []
