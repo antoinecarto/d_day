@@ -14,12 +14,12 @@
         Début des règles : {{ selectedDates[0].toLocaleDateString() }}
       </p>
       <p>
-        <span class="pastille" :style="{ backgroundColor: colorMap.ovulation }"></span>
-        Ovulation maximale estimée : {{ selectedDates[2].toLocaleDateString() }}
-      </p>
-      <p>
         <span class="pastille" :style="{ backgroundColor: colorMap.prediction }"></span>
         Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
+      </p>
+      <p>
+        <span class="pastille" :style="{ backgroundColor: colorMap.ovulation }"></span>
+        Ovulation maximale estimée : {{ selectedDates[2].toLocaleDateString() }}
       </p>
     </div>
   </div>
