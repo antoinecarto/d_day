@@ -1,39 +1,36 @@
 <template>
-  <div class="page-container">
-    <h1 class="page-title">D-Day</h1>
+  <div class="login-form">
+    <h1 class="text-3xl font-bold text-center mb-6">D-Day</h1>
+    <h2 v-if="mode === 'login'">Connexion</h2>
+    <h2 v-else>Inscription</h2>
 
-    <div class="login-form">
-      <h2 v-if="mode === 'login'">Connexion</h2>
-      <h2 v-else>Inscription</h2>
+    <form @submit.prevent="submit">
+      <input type="email" v-model="email" placeholder="Email" required autocomplete="username" />
+      <input
+        type="password"
+        v-model="password"
+        placeholder="Mot de passe"
+        required
+        autocomplete="current-password"
+      />
 
-      <form @submit.prevent="submit">
-        <input type="email" v-model="email" placeholder="Email" required autocomplete="username" />
-        <input
-          type="password"
-          v-model="password"
-          placeholder="Mot de passe"
-          required
-          autocomplete="current-password"
-        />
+      <button :disabled="isLoading" type="submit">
+        {{ mode === 'login' ? 'Se connecter' : "S'inscrire" }}
+      </button>
+    </form>
 
-        <button :disabled="isLoading" type="submit">
-          {{ mode === 'login' ? 'Se connecter' : "S'inscrire" }}
-        </button>
-      </form>
+    <p v-if="error" style="color: red">{{ error }}</p>
 
-      <p v-if="error" style="color: red">{{ error }}</p>
+    <p>
+      <button @click="mode = mode === 'login' ? 'register' : 'login'" style="margin-top: 1rem">
+        {{ mode === 'login' ? 'Créer un compte' : 'Déjà un compte ? Connectez-vous' }}
+      </button>
+    </p>
 
-      <p>
-        <button @click="mode = mode === 'login' ? 'register' : 'login'" style="margin-top: 1rem">
-          {{ mode === 'login' ? 'Créer un compte' : 'Déjà un compte ? Connectez-vous' }}
-        </button>
-      </p>
-
-      <p v-if="isLoggedIn">
-        Connecté en tant que : {{ user?.email }}
-        <button @click="logout">Se déconnecter</button>
-      </p>
-    </div>
+    <p v-if="isLoggedIn">
+      Connecté en tant que : {{ user?.email }}
+      <button @click="logout">Se déconnecter</button>
+    </p>
   </div>
 </template>
 
@@ -96,34 +93,21 @@ const logout = async () => {
 
 const isLoggedIn = computed(() => !!user.value)
 </script>
+
 <style scoped>
-.page-container {
-  max-width: 500px;
-  margin: 2rem auto;
-  padding: 1rem;
-  text-align: center;
-}
-
-.page-title {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  font-weight: bold;
-}
-
 .login-form {
+  max-width: 320px;
+  margin: 2rem auto;
   padding: 1rem;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background: white;
 }
-
 .login-form input {
   display: block;
   width: 100%;
   margin-bottom: 1rem;
   padding: 0.5rem;
 }
-
 .login-form button {
   padding: 0.5rem 1rem;
 }

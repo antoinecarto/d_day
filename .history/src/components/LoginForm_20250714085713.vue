@@ -1,6 +1,7 @@
 <template>
   <div class="page-container">
     <h1 class="page-title">D-Day</h1>
+    <!-- ✅ Titre principal -->
 
     <div class="login-form">
       <h2 v-if="mode === 'login'">Connexion</h2>
