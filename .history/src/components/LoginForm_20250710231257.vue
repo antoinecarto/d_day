@@ -1,5 +1,4 @@
 <template>
-  <h1 class="text-3xl font-bold text-center mb-6">D-Day</h1>
   <div class="login-form">
     <h2 v-if="mode === 'login'">Connexion</h2>
     <h2 v-else>Inscription</h2>

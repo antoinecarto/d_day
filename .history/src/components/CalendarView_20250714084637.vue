@@ -1,12 +1,11 @@
 <template>
   <div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">D-Day</h1>
     <v-calendar
       is-expanded
       :attributes="calendarAttributes"
       @dayclick="onDayClick"
-      @daymousedown="onDayMouseDown"
-      @daymouseup="onDayMouseUp"
+      @daymousedown="onDayMouseDown"    <!-- AJOUT -->
+      @daymouseup="onDayMouseUp"        <!-- AJOUT -->
       :disabled="isSaving"
     />
 
@@ -190,7 +189,7 @@ const onDayMouseUp = () => {
 
 const confirmDeletion = async (date) => {
   const confirmed = window.confirm(
-    `Confirmez-vous la suppression de la période débutant le ${date.toLocaleDateString()} ?`,
+    `Confirmez-vous la suppression de la période débutant le ${date.toLocaleDateString()} ?`
   )
   if (!confirmed) return
 
@@ -202,7 +201,7 @@ const confirmDeletion = async (date) => {
     const snapshot = await getDocs(periodsCollectionRef)
 
     const docToDelete = snapshot.docs.find(
-      (doc) => new Date(doc.data().startDate).toDateString() === date.toDateString(),
+      (doc) => new Date(doc.data().startDate).toDateString() === date.toDateString()
     )
     if (docToDelete) {
       await deleteDoc(docToDelete.ref)
