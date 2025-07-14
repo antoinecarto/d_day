@@ -5,10 +5,10 @@
       is-expanded
       :attributes="calendarAttributes"
       @dayclick="onDayClick"
-      @daymousedown="(day) => handleLongPress(day, 'mouse')"
-      @daymouseup="cancelLongPress"
-      @daytouchstart="(day) => handleLongPress(day, 'touch')"
-      @daytouchend="cancelLongPress"
+      @daymousedown="onDayMouseDown"
+      @daymouseup="onDayMouseUp"
+      @daytouchstart="onDayTouchStart"
+      @daytouchend="onDayTouchEnd"
       @daycontextmenu="onDayRightClick"
       :disabled="isSaving"
     />
@@ -50,33 +50,13 @@
         La nouvelle durée s'appliquera aux prochains cycles enregistrés.
       </p>
     </div>
-    <div
-      class="overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
-      style="height: 200px"
-    >
-      <label> Pour supprimer une date : </label>
-      <div
-        v-for="(period, index) in allPeriods"
-        :key="period.id"
-        class="flex justify-between items-center gap-4 px-4 py-3 text-sm hover:bg-gray-50 transition"
-      >
-        <span class="font-medium text-gray-800"> 📅 {{ formatDate(period.startDate) }} </span>
-        <button
-          @click="deleteById(period.id)"
-          class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none"
-          aria-label="Supprimer cette date"
-        >
-          ❌
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { db, auth } from '../firebase'
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc } from 'firebase/firestore'
 
 const selectedDates = ref([])
 const calendarAttributes = ref([])
@@ -89,22 +69,7 @@ const onDayRightClick = ({ date, event }) => {
   event.preventDefault() // Évite le menu contextuel du navigateur
   confirmDeletion(date)
 }
-
-const deleteById = async (id) => {
-  const user = auth.currentUser
-  if (!user) return
-  const confirmed = window.confirm('Confirmez la suppression de cette période ?')
-  if (!confirmed) return
-  try {
-    const ref = doc(db, 'users', user.uid, 'periods', id)
-    await deleteDoc(ref)
-    await loadPeriods()
-  } catch (error) {
-    console.error('Erreur suppression :', error)
-  }
-}
-
-const allPeriods = ref([]) // liste visible dans tableau
+let longPressTimer = null
 
 const loadPeriods = async () => {
   const user = auth.currentUser
@@ -114,43 +79,35 @@ const loadPeriods = async () => {
     const periodsCollectionRef = collection(db, 'users', user.uid, 'periods')
     const q = query(periodsCollectionRef, orderBy('createdAt', 'desc'))
     const snapshot = await getDocs(q)
+    const periods = snapshot.docs.map((doc) => doc.data())
 
-    const periods = snapshot.docs.map((doc) => {
-      const data = doc.data()
-      const startDate = new Date(data.startDate)
-      const predictedDate = new Date(data.predictedDate)
+    if (periods.length > 0) {
+      const latest = periods[0]
+      const startDate = new Date(latest.startDate)
+      const predictedDate = new Date(latest.predictedDate)
+      const ovulationDate = new Date(startDate)
+      ovulationDate.setDate(
+        startDate.getDate() + Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24) / 2),
+      )
+
+      selectedDates.value = [startDate, predictedDate, ovulationDate]
+    }
+
+    const referenceDate = selectedDates.value[0] || new Date()
+
+    const newAttributes = periods.flatMap((period, i) => {
+      const startDate = new Date(period.startDate)
+      const predictedDate = new Date(period.predictedDate)
       const ovulationDate = new Date(startDate)
       const cycleDays = Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24))
       ovulationDate.setDate(startDate.getDate() + Math.floor(cycleDays / 2))
 
-      return {
-        id: doc.id, // utile pour suppression directe
-        ...data,
-        startDate,
-        predictedDate,
-        ovulationDate,
-        cycleDays,
-      }
-    })
-
-    // 🧾 Met à jour le tableau récapitulatif
-    allPeriods.value = periods
-
-    // 🩸 Met à jour le résumé (section "Dernière période enregistrée")
-    if (periods.length > 0) {
-      const latest = periods[0]
-      selectedDates.value = [latest.startDate, latest.predictedDate, latest.ovulationDate]
-    }
-
-    // 📆 Met à jour les attributs V-Calendar
-    const referenceDate = selectedDates.value[0] || new Date()
-    const newAttributes = periods.flatMap((period, i) => {
-      const isPast = period.startDate < referenceDate
+      const isPast = startDate < referenceDate
 
       return [
         {
           key: `rules-${i}`,
-          dates: [period.startDate],
+          dates: [startDate],
           highlight: {
             color: 'red',
             fillMode: 'solid',
@@ -160,7 +117,7 @@ const loadPeriods = async () => {
         },
         {
           key: `prediction-${i}`,
-          dates: [period.predictedDate],
+          dates: [predictedDate],
           highlight: {
             color: 'pink',
             fillMode: 'outline',
@@ -170,7 +127,7 @@ const loadPeriods = async () => {
         },
         {
           key: `ovulation-${i}`,
-          dates: [period.ovulationDate],
+          dates: [ovulationDate],
           highlight: {
             color: 'green',
             fillMode: 'solid',
@@ -187,91 +144,7 @@ const loadPeriods = async () => {
   }
 }
 
-function formatDate(date) {
-  return new Date(date).toLocaleDateString()
-}
-
-// const allPeriods = ref([])
-
-// const loadPeriods = async () => {
-//   const user = auth.currentUser
-//   if (!user) return
-
-//   try {
-//     const periodsCollectionRef = collection(db, 'users', user.uid, 'periods')
-//     const q = query(periodsCollectionRef, orderBy('createdAt', 'desc'))
-//     const snapshot = await getDocs(q)
-//     const periods = snapshot.docs.map((doc) => doc.data())
-
-//     if (periods.length > 0) {
-//       const latest = periods[0]
-//       const startDate = new Date(latest.startDate)
-//       const predictedDate = new Date(latest.predictedDate)
-//       const ovulationDate = new Date(startDate)
-//       ovulationDate.setDate(
-//         startDate.getDate() + Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24) / 2),
-//       )
-
-//       selectedDates.value = [startDate, predictedDate, ovulationDate]
-//     }
-
-//     const referenceDate = selectedDates.value[0] || new Date()
-
-//     const newAttributes = periods.flatMap((period, i) => {
-//       const startDate = new Date(period.startDate)
-//       const predictedDate = new Date(period.predictedDate)
-//       const ovulationDate = new Date(startDate)
-//       const cycleDays = Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24))
-//       ovulationDate.setDate(startDate.getDate() + Math.floor(cycleDays / 2))
-
-//       const isPast = startDate < referenceDate
-
-//       return [
-//         {
-//           key: `rules-${i}`,
-//           dates: [startDate],
-//           highlight: {
-//             color: 'red',
-//             fillMode: 'solid',
-//             contentClass: isPast ? 'past-opacity' : '',
-//           },
-//           popover: { label: 'Début des règles' },
-//         },
-//         {
-//           key: `prediction-${i}`,
-//           dates: [predictedDate],
-//           highlight: {
-//             color: 'pink',
-//             fillMode: 'outline',
-//             contentClass: isPast ? 'past-opacity' : '',
-//           },
-//           popover: { label: 'Prochaines règles estimées' },
-//         },
-//         {
-//           key: `ovulation-${i}`,
-//           dates: [ovulationDate],
-//           highlight: {
-//             color: 'green',
-//             fillMode: 'solid',
-//             contentClass: isPast ? 'past-opacity' : '',
-//           },
-//           popover: { label: 'Ovulation maximale' },
-//         },
-//       ]
-//     })
-
-//     calendarAttributes.value = newAttributes
-//   } catch (error) {
-//     console.error('Erreur chargement périodes:', error)
-//   }
-// }
-
 const onDayClick = async ({ date }) => {
-  if (wasLongPressed.value) {
-    wasLongPressed.value = false
-    return
-  }
-
   if (isSaving.value) return
   isSaving.value = true
 
@@ -309,25 +182,24 @@ const onDayClick = async ({ date }) => {
 }
 
 // --- GESTION CLIC LONG SOURIS & TACTILE POUR SUPPRESSION ---
-let longPressTimer = null
-let longPressDate = null
-const wasLongPressed = ref(false)
-
-const handleLongPress = (day, type) => {
-  if (!day?.date) return
-
-  wasLongPressed.value = false
-
-  longPressDate = new Date(day.date)
+const onDayMouseDown = ({ date }) => {
   longPressTimer = setTimeout(() => {
-    wasLongPressed.value = true
-    confirmDeletion(longPressDate)
-    longPressDate = null
+    confirmDeletion(date)
   }, 800)
 }
-const cancelLongPress = () => {
+
+const onDayMouseUp = () => {
   clearTimeout(longPressTimer)
-  longPressDate = null
+}
+
+const onDayTouchStart = ({ date }) => {
+  longPressTimer = setTimeout(() => {
+    confirmDeletion(date)
+  }, 800)
+}
+
+const onDayTouchEnd = () => {
+  clearTimeout(longPressTimer)
 }
 
 const confirmDeletion = async (date) => {
@@ -355,6 +227,7 @@ const confirmDeletion = async (date) => {
     console.error('Erreur suppression période:', error)
   }
 }
+// --- FIN ---
 
 watch(cycleDuration, (newVal, oldVal) => {
   if (selectedDates.value.length && newVal !== oldVal) {

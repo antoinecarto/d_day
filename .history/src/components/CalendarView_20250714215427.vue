@@ -50,27 +50,26 @@
         La nouvelle durée s'appliquera aux prochains cycles enregistrés.
       </p>
     </div>
-    <div
-      class="overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
-      style="height: 200px"
+<!-- Conteneur avec ascenseur vertical -->
+<div
+  class="period-list max-h-[300px] overflow-y-auto border border-gray-300 rounded mt-4 divide-y divide-gray-200"
+>
+  <div
+    class="flex items-center justify-between px-4 py-2 text-sm"
+    v-for="(period, index) in allPeriods"
+    :key="period.id"
+  >
+    <span class="font-medium">Date : {{ formatDate(period.startDate) }}</span>
+    <button
+      @click="deleteById(period.id)"
+      class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none"
+      aria-label="Supprimer"
     >
-      <label> Pour supprimer une date : </label>
-      <div
-        v-for="(period, index) in allPeriods"
-        :key="period.id"
-        class="flex justify-between items-center gap-4 px-4 py-3 text-sm hover:bg-gray-50 transition"
-      >
-        <span class="font-medium text-gray-800"> 📅 {{ formatDate(period.startDate) }} </span>
-        <button
-          @click="deleteById(period.id)"
-          class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none"
-          aria-label="Supprimer cette date"
-        >
-          ❌
-        </button>
-      </div>
-    </div>
+      ❌
+    </button>
   </div>
+</div>
+
 </template>
 
 <script setup>

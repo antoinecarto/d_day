@@ -51,16 +51,14 @@
       </p>
     </div>
     <div
-      class="overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
-      style="height: 200px"
+      class="h-[240px] overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
     >
-      <label> Pour supprimer une date : </label>
       <div
         v-for="(period, index) in allPeriods"
         :key="period.id"
         class="flex justify-between items-center gap-4 px-4 py-3 text-sm hover:bg-gray-50 transition"
       >
-        <span class="font-medium text-gray-800"> 📅 {{ formatDate(period.startDate) }} </span>
+        <span class="font-medium text-gray-800">{{ formatDate(period.startDate) }}</span>
         <button
           @click="deleteById(period.id)"
           class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none"

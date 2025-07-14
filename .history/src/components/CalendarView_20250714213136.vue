@@ -51,24 +51,29 @@
       </p>
     </div>
     <div
-      class="overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
-      style="height: 200px"
+      class="max-h-[200px] overflow-y-auto border rounded"
+      :class="{ 'shadow-inner': allPeriods.length > 5 }"
     >
-      <label> Pour supprimer une date : </label>
-      <div
-        v-for="(period, index) in allPeriods"
-        :key="period.id"
-        class="flex justify-between items-center gap-4 px-4 py-3 text-sm hover:bg-gray-50 transition"
-      >
-        <span class="font-medium text-gray-800"> 📅 {{ formatDate(period.startDate) }} </span>
-        <button
-          @click="deleteById(period.id)"
-          class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none"
-          aria-label="Supprimer cette date"
-        >
-          ❌
-        </button>
-      </div>
+      <table class="w-full min-w-[400px] table-fixed">
+        <thead class="sticky top-0 bg-gray-100">
+          <tr>
+            <th class="p-2 text-sm whitespace-nowrap">Date de début</th>
+            <th class="p-2 text-sm text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(period, index) in allPeriods" :key="period.id" class="border-t">
+            <td class="p-2 text-sm whitespace-nowrap">
+              {{ formatDate(period.startDate) }}
+            </td>
+            <td class="p-2 text-right">
+              <button @click="deleteById(period.id)">
+                <span class="text-red-500 text-xl hover:text-red-700 cursor-pointer">✖</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>

@@ -54,7 +54,6 @@
       class="overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
       style="height: 200px"
     >
-      <label> Pour supprimer une date : </label>
       <div
         v-for="(period, index) in allPeriods"
         :key="period.id"

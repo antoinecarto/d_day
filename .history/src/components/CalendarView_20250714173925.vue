@@ -50,33 +50,34 @@
         La nouvelle durée s'appliquera aux prochains cycles enregistrés.
       </p>
     </div>
-    <div
-      class="overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
-      style="height: 200px"
-    >
-      <label> Pour supprimer une date : </label>
-      <div
-        v-for="(period, index) in allPeriods"
-        :key="period.id"
-        class="flex justify-between items-center gap-4 px-4 py-3 text-sm hover:bg-gray-50 transition"
-      >
-        <span class="font-medium text-gray-800"> 📅 {{ formatDate(period.startDate) }} </span>
-        <button
-          @click="deleteById(period.id)"
-          class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none"
-          aria-label="Supprimer cette date"
-        >
-          ❌
-        </button>
-      </div>
-    </div>
+    <table v-if="allPeriods.length" class="mt-4 w-full border">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="p-2">Date de début</th>
+          <th class="p-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(period, index) in allPeriods" :key="index" class="border-t">
+          <td class="p-2">{{ formatDate(period.startDate) }}</td>
+          <td class="p-2 text-right">
+            <button
+              @click="confirmDeletion(new Date(period.startDate))"
+              class="text-red-600 hover:underline"
+            >
+              Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { db, auth } from '../firebase'
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc } from 'firebase/firestore'
 
 const selectedDates = ref([])
 const calendarAttributes = ref([])
@@ -88,20 +89,6 @@ const userHasChangedCycle = ref(false)
 const onDayRightClick = ({ date, event }) => {
   event.preventDefault() // Évite le menu contextuel du navigateur
   confirmDeletion(date)
-}
-
-const deleteById = async (id) => {
-  const user = auth.currentUser
-  if (!user) return
-  const confirmed = window.confirm('Confirmez la suppression de cette période ?')
-  if (!confirmed) return
-  try {
-    const ref = doc(db, 'users', user.uid, 'periods', id)
-    await deleteDoc(ref)
-    await loadPeriods()
-  } catch (error) {
-    console.error('Erreur suppression :', error)
-  }
 }
 
 const allPeriods = ref([]) // liste visible dans tableau
