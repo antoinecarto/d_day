@@ -1,73 +1,95 @@
 <template>
-  <div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">D-Day</h1>
-    <v-calendar
-      is-expanded
-      :attributes="calendarAttributes"
-      @dayclick="onDayClick"
-      @daymousedown="(day) => handleLongPress(day, 'mouse')"
-      @daymouseup="cancelLongPress"
-      @daytouchstart="(day) => handleLongPress(day, 'touch')"
-      @daytouchend="cancelLongPress"
-      @daycontextmenu="onDayRightClick"
-      :disabled="isSaving"
-    />
+  <div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-screen-md mx-auto bg-white shadow-lg rounded-xl p-6 space-y-6">
+      <h1 class="text-3xl font-bold text-center text-gray-800">D-Day</h1>
 
-    <div v-if="selectedDates.length" class="mt-4">
-      <p><strong>Dernière période enregistrée :</strong></p>
-      <p>
-        <span class="dot red"></span>
-        Début des règles : {{ selectedDates[0].toLocaleDateString() }}
-      </p>
-      <p>
-        <span class="dot green"></span>
-        Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
-      </p>
-      <p>
-        <span class="dot pink"></span>
-        Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
-      </p>
-    </div>
+      <div class="flex justify-center">
+        <v-calendar
+          is-expanded
+          :attributes="calendarAttributes"
+          @dayclick="onDayClick"
+          @daymousedown="(day) => handleLongPress(day, 'mouse')"
+          @daymouseup="cancelLongPress"
+          @daytouchstart="(day) => handleLongPress(day, 'touch')"
+          @daytouchend="cancelLongPress"
+          @daycontextmenu="onDayRightClick"
+          :disabled="isSaving"
+          class="w-full max-w-md"
+        />
+      </div>
 
-    <div
-      v-if="userHasChangedCycle"
-      class="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-yellow-800"
-    >
-      ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
-      <strong>{{ cycleDuration }}</strong> jours.
-    </div>
+      <div v-if="selectedDates.length" class="space-y-2 text-gray-700">
+        <p class="font-semibold">Dernière période enregistrée :</p>
+        <p>
+          <span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+          Début des règles : {{ selectedDates[0].toLocaleDateString() }}
+        </p>
+        <p>
+          <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+          Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
+        </p>
+        <p>
+          <span class="inline-block w-3 h-3 rounded-full bg-pink-400 mr-2"></span>
+          Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
+        </p>
+      </div>
 
-    <div class="mt-4 text-right">
-      <button @click="showSettings = !showSettings">⚙️ Paramètres</button>
-    </div>
-
-    <div v-if="showSettings" class="mt-2">
-      <label>
-        Durée du cycle (jours) :
-        <input type="number" v-model.number="cycleDuration" min="20" max="40" />
-      </label>
-      <p class="text-sm text-gray-500">
-        La nouvelle durée s'appliquera aux prochains cycles enregistrés.
-      </p>
-    </div>
-    <div
-      class="overflow-y-scroll border border-gray-300 rounded-md mt-4 divide-y divide-gray-200"
-      style="height: 200px"
-    >
-      <label> Pour supprimer une date : </label>
       <div
-        v-for="(period, index) in allPeriods"
-        :key="period.id"
-        class="flex justify-between items-center gap-4 px-4 py-3 text-sm hover:bg-gray-50 transition"
+        v-if="userHasChangedCycle"
+        class="p-4 bg-yellow-100 border border-yellow-300 rounded text-yellow-800 text-sm"
       >
-        <span class="font-medium text-gray-800"> 📅 {{ formatDate(period.startDate) }} </span>
+        ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
+        <strong>{{ cycleDuration }}</strong> jours.
+      </div>
+
+      <div class="text-right">
         <button
-          @click="deleteById(period.id)"
-          class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none"
-          aria-label="Supprimer cette date"
+          @click="showSettings = !showSettings"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm font-medium transition"
         >
-          ❌
+          ⚙️ Paramètres
         </button>
+      </div>
+
+      <div v-if="showSettings" class="space-y-4">
+        <label class="block">
+          <span class="text-gray-700 font-medium">Durée du cycle (jours) :</span>
+          <input
+            type="number"
+            v-model.number="cycleDuration"
+            min="20"
+            max="40"
+            class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+          />
+        </label>
+        <p class="text-sm text-gray-500 italic">
+          La nouvelle durée s'appliquera aux prochains cycles enregistrés.
+        </p>
+          <label class="font-bold block px-4 py-2 text-gray-600 text-sm  ">
+            <p class="font-semibold">Liste des différentes périodes :</p>
+          </label>
+        <div
+          class="overflow-y-scroll border border-gray-300 rounded-md divide-y divide-gray-200"
+          style="max-height: 80px"
+        >
+
+          <div
+            v-for="(period, index) in allPeriods"
+            :key="period.id"
+            class="group"
+          >
+            <div class="flex justify-center items-center px-4 py-3 text-sm hover:bg-gray-50 transition pl-5">
+              <span class="font-medium text-gray-800">📅 {{ formatDate(period.startDate)}}&nbsp;&nbsp;</span>
+              <button
+                @click="deleteById(period.id)" 
+                class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none pl-5"
+                aria-label="Supprimer cette date"
+              >
+                ❌
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
