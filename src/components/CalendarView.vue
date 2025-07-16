@@ -1,99 +1,117 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-4">
-    <div class="max-w-screen-md mx-auto bg-white shadow-lg rounded-xl p-6 space-y-6">
-      <h1 class="text-3xl font-bold text-center text-gray-800">D-Day</h1>
+  <div class="bg-gray-100 py-8">
+    <div class="container mx-auto">
+      <div class="bg-gray shadow-lg rounded-xl px-6 py-8 space-y-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800">D-Day</h1>
 
-      <div class="flex justify-center">
-        <v-calendar
-          is-expanded
-          :attributes="calendarAttributes"
-          @dayclick="onDayClick"
-          @daymousedown="(day) => handleLongPress(day, 'mouse')"
-          @daymouseup="cancelLongPress"
-          @daytouchstart="(day) => handleLongPress(day, 'touch')"
-          @daytouchend="cancelLongPress"
-          @daycontextmenu="onDayRightClick"
-          :disabled="isSaving"
-          class="w-full max-w-md"
-        />
-      </div>
-
-      <div v-if="selectedDates.length" class="space-y-2 text-gray-700">
-        <p class="font-semibold">Dernière période enregistrée :</p>
-        <p>
-          <span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
-          Début des règles : {{ selectedDates[0].toLocaleDateString() }}
-        </p>
-        <p>
-          <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
-          Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
-        </p>
-        <p>
-          <span class="inline-block w-3 h-3 rounded-full bg-pink-400 mr-2"></span>
-          Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
-        </p>
-      </div>
-
-      <div
-        v-if="userHasChangedCycle"
-        class="p-4 bg-yellow-100 border border-yellow-300 rounded text-yellow-800 text-sm"
-      >
-        ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
-        <strong>{{ cycleDuration }}</strong> jours.
-      </div>
-
-      <div class="text-right">
-        <button
-          @click="showSettings = !showSettings"
-          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm font-medium transition"
-        >
-          ⚙️ Paramètres
-        </button>
-      </div>
-
-      <div v-if="showSettings" class="space-y-4">
-        <label class="block">
-          <span class="text-gray-700 font-medium">Durée du cycle (jours) :</span>
-          <input
-            type="number"
-            v-model.number="cycleDuration"
-            min="20"
-            max="40"
-            class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+        <div class="flex justify-center">
+          <v-calendar
+            is-expanded
+            :attributes="calendarAttributes"
+            @dayclick="onDayClick"
+            @daymousedown="(day) => handleLongPress(day, 'mouse')"
+            @daymouseup="cancelLongPress"
+            @daytouchstart="(day) => handleLongPress(day, 'touch')"
+            @daytouchend="cancelLongPress"
+            @daycontextmenu="onDayRightClick"
+            :disabled="isSaving"
+            class="w-full max-w-md"
           />
-        </label>
-        <p class="text-sm text-gray-500 italic">
-          La nouvelle durée s'appliquera aux prochains cycles enregistrés.
-        </p>
-          <label class="font-bold block px-4 py-2 text-gray-600 text-sm  ">
-            <p class="font-semibold">Liste des différentes périodes :</p>
-          </label>
-        <div
-          class="overflow-y-scroll border border-gray-300 rounded-md divide-y divide-gray-200"
-          style="max-height: 80px"
-        >
+        </div>
+
+        <!-- ✅ MARGES APPLIQUÉES ICI -->
+        <div class="space-y-6">
+          <div v-if="selectedDates.length" class="space-y-2 text-gray-700">
+            <p class="font-semibold">Dernière période enregistrée :</p>
+            <p>
+              <span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+              Début des règles : {{ selectedDates[0].toLocaleDateString() }}
+            </p>
+            <p>
+              <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+              Ovulation maximale : {{ selectedDates[2].toLocaleDateString() }}
+            </p>
+            <p>
+              <span class="inline-block w-3 h-3 rounded-full bg-pink-400 mr-2"></span>
+              Prochaines règles estimées : {{ selectedDates[1].toLocaleDateString() }}
+            </p>
+          </div>
 
           <div
-            v-for="(period, index) in allPeriods"
-            :key="period.id"
-            class="group"
+            v-if="userHasChangedCycle"
+            class="p-4 bg-yellow-100 border border-yellow-300 rounded text-yellow-800 text-sm"
           >
-            <div class="flex justify-center items-center px-4 py-3 text-sm hover:bg-gray-50 transition pl-5">
-              <span class="font-medium text-gray-800">📅 {{ formatDate(period.startDate)}}&nbsp;&nbsp;</span>
-              <button
-                @click="deleteById(period.id)" 
-                class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none pl-5"
-                aria-label="Supprimer cette date"
+            ⚠️ Vous avez changé la durée du cycle. Les futures prédictions sont maintenant basées sur
+            <strong>{{ cycleDuration }}</strong> jours.
+          </div>
+
+          <div class="text-right">
+            <button
+              @click="showSettings = !showSettings"
+              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm font-medium transition text-black"
+            >
+              ⚙️ Paramètres
+            </button>
+          </div>
+
+          <div v-if="showSettings" class="space-y-4">
+            <div class="flex items-center gap-4">
+              <label class="text-gray-700 font-medium whitespace-nowrap">
+                Durée du cycle (jours) :
+              </label>
+              <input
+                type="number"
+                v-model.number="cycleDuration"
+                min="20"
+                max="40"
+                class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 w-24"
+              />
+            </div>
+
+            <p class="text-sm text-gray-700 italic">
+              La nouvelle durée s'appliquera aux prochains cycles enregistrés.
+            </p>
+            <p v-if="averageCycleDuration !== null" class="text-sm text-gray-700">
+              Moyenne de la durée du cycle sur {{ allPeriods.length - 1 }} périodes :
+              <strong>{{ averageCycleDuration }} jours</strong>
+            </p>
+            <p v-else class="text-sm text-gray-500 italic">
+                Pas assez de données pour calculer une moyenne fiable.
+            </p>
+
+            <label class="font-bold block px-4 py-2 text-gray-700 text-sm">
+              <p class="font-semibold">Liste des différentes périodes :</p>
+            </label>
+
+            <div
+              class="overflow-y-scroll border border-gray-300 rounded-md divide-y divide-gray-200 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+              style="max-height: 80px"
+            >
+              <div
+                v-for="(period, index) in allPeriods"
+                :key="period.id"
+                class="group"
               >
-                ❌
-              </button>
+                <div class="flex justify-center items-center px-4 py-3 text-sm hover:bg-gray-50 transition pl-5">
+                  <span class="font-medium text-gray-800">📅 {{ formatDate(period.startDate) }}&nbsp;&nbsp;</span>
+                  <button
+                    @click="deleteById(period.id)"
+                    class="text-red-500 text-lg hover:text-red-700 leading-none focus:outline-none pl-5"
+                    aria-label="Supprimer cette date"
+                  >
+                    ❌
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <!-- ✅ FIN DU BLOC AVEC MARGES -->
       </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
@@ -202,7 +220,7 @@ const loadPeriods = async () => {
         },
       ]
     })
-
+    averageCycleDuration.value = calculateAverageCycle(periods)
     calendarAttributes.value = newAttributes
   } catch (error) {
     console.error('Erreur chargement périodes:', error)
@@ -213,80 +231,6 @@ function formatDate(date) {
   return new Date(date).toLocaleDateString()
 }
 
-// const allPeriods = ref([])
-
-// const loadPeriods = async () => {
-//   const user = auth.currentUser
-//   if (!user) return
-
-//   try {
-//     const periodsCollectionRef = collection(db, 'users', user.uid, 'periods')
-//     const q = query(periodsCollectionRef, orderBy('createdAt', 'desc'))
-//     const snapshot = await getDocs(q)
-//     const periods = snapshot.docs.map((doc) => doc.data())
-
-//     if (periods.length > 0) {
-//       const latest = periods[0]
-//       const startDate = new Date(latest.startDate)
-//       const predictedDate = new Date(latest.predictedDate)
-//       const ovulationDate = new Date(startDate)
-//       ovulationDate.setDate(
-//         startDate.getDate() + Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24) / 2),
-//       )
-
-//       selectedDates.value = [startDate, predictedDate, ovulationDate]
-//     }
-
-//     const referenceDate = selectedDates.value[0] || new Date()
-
-//     const newAttributes = periods.flatMap((period, i) => {
-//       const startDate = new Date(period.startDate)
-//       const predictedDate = new Date(period.predictedDate)
-//       const ovulationDate = new Date(startDate)
-//       const cycleDays = Math.floor((predictedDate - startDate) / (1000 * 60 * 60 * 24))
-//       ovulationDate.setDate(startDate.getDate() + Math.floor(cycleDays / 2))
-
-//       const isPast = startDate < referenceDate
-
-//       return [
-//         {
-//           key: `rules-${i}`,
-//           dates: [startDate],
-//           highlight: {
-//             color: 'red',
-//             fillMode: 'solid',
-//             contentClass: isPast ? 'past-opacity' : '',
-//           },
-//           popover: { label: 'Début des règles' },
-//         },
-//         {
-//           key: `prediction-${i}`,
-//           dates: [predictedDate],
-//           highlight: {
-//             color: 'pink',
-//             fillMode: 'outline',
-//             contentClass: isPast ? 'past-opacity' : '',
-//           },
-//           popover: { label: 'Prochaines règles estimées' },
-//         },
-//         {
-//           key: `ovulation-${i}`,
-//           dates: [ovulationDate],
-//           highlight: {
-//             color: 'green',
-//             fillMode: 'solid',
-//             contentClass: isPast ? 'past-opacity' : '',
-//           },
-//           popover: { label: 'Ovulation maximale' },
-//         },
-//       ]
-//     })
-
-//     calendarAttributes.value = newAttributes
-//   } catch (error) {
-//     console.error('Erreur chargement périodes:', error)
-//   }
-// }
 
 const onDayClick = async ({ date }) => {
   if (wasLongPressed.value) {
@@ -376,6 +320,23 @@ const confirmDeletion = async (date) => {
   } catch (error) {
     console.error('Erreur suppression période:', error)
   }
+}
+// Calcul durée moyenne
+const averageCycleDuration = ref(null)
+
+const calculateAverageCycle = (periods) => {
+  if (periods.length < 2) return null
+
+  const durations = []
+  for (let i = 0; i < periods.length - 1; i++) {
+    const current = periods[i].startDate
+    const next = periods[i + 1].startDate
+    const diff = Math.floor((current - next) / (1000 * 60 * 60 * 24)) // en jours
+    durations.push(diff)
+  }
+
+  const sum = durations.reduce((a, b) => a + b, 0)
+  return Math.round(sum / durations.length)
 }
 
 watch(cycleDuration, (newVal, oldVal) => {
