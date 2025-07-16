@@ -2,21 +2,22 @@
   <div class="page-container">
     <h1 class="page-title">D-Day</h1>
 
-    <div class="login-form">
+    <div class="login-form text-gray-900">
       <h2 v-if="mode === 'login'">Connexion</h2>
       <h2 v-else>Inscription</h2>
 
       <form @submit.prevent="submit">
-        <input type="email" v-model="email" placeholder="Email" required autocomplete="username" />
+        <input type="email" v-model="email" placeholder="Email" required autocomplete="username" class="text-gray-900"/>
         <input
           type="password"
           v-model="password"
           placeholder="Mot de passe"
           required
           autocomplete="current-password"
+          class="text-gray-900"
         />
 
-        <button :disabled="isLoading" type="submit">
+        <button :disabled="isLoading" type="submit" class="text-gray-900">
           {{ mode === 'login' ? 'Se connecter' : "S'inscrire" }}
         </button>
       </form>
@@ -31,7 +32,7 @@
 
       <p v-if="isLoggedIn">
         Connecté en tant que : {{ user?.email }}
-        <button @click="logout">Se déconnecter</button>
+        <button @click="logout" class="text-gray-900">Se déconnecter</button>
       </p>
     </div>
   </div>
