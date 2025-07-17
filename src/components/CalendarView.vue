@@ -48,7 +48,7 @@
           <div class="text-right">
             <button
               @click="showSettings = !showSettings"
-              class="px-4 py-2 bg-gray-900 hover:bg-gray-200 rounded text-sm font-medium transition text-black"
+              class="px-4 py-2 bg-white hover:bg-gray-200 rounded text-sm font-medium transition text-gray-900"
             >
               ⚙️ Paramètres
             </button>
@@ -64,7 +64,7 @@
                 v-model.number="cycleDuration"
                 min="20"
                 max="40"
-                class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 w-24 text-gray-900"
+                class="border border-gray-300 bg-white rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300 w-24 text-gray-900"
               />
             </div>
 
