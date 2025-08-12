@@ -2,6 +2,7 @@
   <div class="min-h-screen bg-gradient-to-b from-pink-50 to-gray-100 py-8 px-4">
     <div class="max-w-screen-md mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-8">
       <!-- Titre principal avec bouton d'aide -->
+      <!-- Titre principal avec bouton d'aide -->
       <div class="relative flex items-center justify-center w-full">
         <!-- Titre centré -->
         <h1 class="text-4xl font-extrabold text-pink-600 tracking-tight">D-Day</h1>
@@ -177,24 +178,6 @@
                 professionnel de santé. Les prédictions sont basées sur des moyennes statistiques et
                 peuvent varier selon chaque personne. Consultez un médecin pour toute préoccupation
                 médicale.
-              </p>
-            </section>
-            <!-- Développeurs -->
-            <section class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-              <h3 class="text-lg font-semibold text-yellow-800 mb-2 flex items-center gap-2">
-                🐞 Signaler un bug
-              </h3>
-              <p class="text-yellow-700 text-sm leading-relaxed">
-                Si vous rencontrez une anomalie ou souhaitez proposer des améliorations, vous pouvez
-                créer une issue directement sur GitHub :
-                <a
-                  href="https://github.com/antoinecarto/d_day/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-blue-600 hover:underline break-all"
-                >
-                  https://github.com/antoinecarto/d_day/issues
-                </a>
               </p>
             </section>
           </div>
@@ -444,7 +427,7 @@ const loadPeriods = async () => {
         },
       ]
     })
-    averageCycleDuration.value = calculateAverageCycle(periods)
+
     calendarAttributes.value = newAttributes
   } catch (error) {
     console.error('Erreur chargement périodes:', error)
@@ -527,23 +510,6 @@ const confirmDeletion = async (date) => {
     console.error('Erreur suppression période:', error)
     alert('Erreur lors de la suppression')
   }
-}
-// Calcul durée moyenne
-const averageCycleDuration = ref(null)
-
-const calculateAverageCycle = (periods) => {
-  if (periods.length < 2) return null
-
-  const durations = []
-  for (let i = 0; i < periods.length - 1; i++) {
-    const current = periods[i].startDate
-    const next = periods[i + 1].startDate
-    const diff = Math.floor((current - next) / (1000 * 60 * 60 * 24)) // en jours
-    durations.push(diff)
-  }
-
-  const sum = durations.reduce((a, b) => a + b, 0)
-  return Math.round(sum / durations.length)
 }
 
 // Gérer le changement de type de stockage

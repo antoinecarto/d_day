@@ -204,9 +204,24 @@ const statusClass = computed<string>(() => {
   return 'bg-green-100 border border-green-300 text-green-800'
 })
 
+// Dans le setup, après les ref :
+watch(selectedStorageType, (newValue, oldValue) => {
+  console.log('selectedStorageType changed:', oldValue, '->', newValue)
+  console.log('Button should be visible:', newValue !== currentStorageType.value)
+})
+
+watch(currentStorageType, (newValue, oldValue) => {
+  console.log('currentStorageType changed:', oldValue, '->', newValue)
+})
+
 // Changer le type de stockage
 const applyStorageChange = async (): Promise<void> => {
+  console.log('=== applyStorageChange CALLED ===')
+  console.log('selectedStorageType:', selectedStorageType.value)
+  console.log('currentStorageType:', currentStorageType.value)
+
   if (selectedStorageType.value === currentStorageType.value) {
+    console.log('Same storage type, returning early')
     return
   }
 
@@ -284,6 +299,8 @@ const performMigration = async (
       statusMessage.value = ''
     }, 5000)
   }
+  console.log('Storage changed to:', currentStorageType.value)
+  console.log('Router should redirect...')
 }
 
 // Export des données locales

@@ -284,6 +284,8 @@ const performMigration = async (
       statusMessage.value = ''
     }, 5000)
   }
+  console.log('Storage changed to:', currentStorageType.value)
+  console.log('Router should redirect...')
 }
 
 // Export des données locales

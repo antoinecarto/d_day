@@ -444,7 +444,7 @@ const loadPeriods = async () => {
         },
       ]
     })
-    averageCycleDuration.value = calculateAverageCycle(periods)
+
     calendarAttributes.value = newAttributes
   } catch (error) {
     console.error('Erreur chargement périodes:', error)
@@ -527,23 +527,6 @@ const confirmDeletion = async (date) => {
     console.error('Erreur suppression période:', error)
     alert('Erreur lors de la suppression')
   }
-}
-// Calcul durée moyenne
-const averageCycleDuration = ref(null)
-
-const calculateAverageCycle = (periods) => {
-  if (periods.length < 2) return null
-
-  const durations = []
-  for (let i = 0; i < periods.length - 1; i++) {
-    const current = periods[i].startDate
-    const next = periods[i + 1].startDate
-    const diff = Math.floor((current - next) / (1000 * 60 * 60 * 24)) // en jours
-    durations.push(diff)
-  }
-
-  const sum = durations.reduce((a, b) => a + b, 0)
-  return Math.round(sum / durations.length)
 }
 
 // Gérer le changement de type de stockage

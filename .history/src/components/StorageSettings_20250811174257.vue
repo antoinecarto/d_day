@@ -49,68 +49,6 @@
       <div class="mt-1 text-xs text-gray-500">{{ periodsCount }} période(s) enregistrée(s)</div>
     </div>
 
-    <!-- Modal de confirmation pour migration vers Firebase -->
-    <div
-      v-if="showMigrationModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-        <h4 class="text-lg font-semibold text-gray-800 mb-4">🔄 Migration vers Firebase</h4>
-
-        <div class="mb-4">
-          <p class="text-gray-700 mb-3">
-            Vous avez <strong>{{ periodsCount }} période(s)</strong> enregistrée(s) localement.
-          </p>
-          <p class="text-gray-700 mb-4">Que souhaitez-vous faire avec ces données ?</p>
-        </div>
-
-        <div class="space-y-3">
-          <!-- Option 1: Transférer les données -->
-          <button
-            @click="confirmMigrationWithData"
-            :disabled="isProcessing"
-            class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium text-left"
-          >
-            <div class="flex items-center gap-3">
-              <span class="text-xl">📤</span>
-              <div>
-                <div class="font-medium">Transférer vers Firebase</div>
-                <div class="text-sm opacity-90">
-                  Copier toutes les données locales vers le cloud
-                </div>
-              </div>
-            </div>
-          </button>
-
-          <!-- Option 2: Commencer à zéro -->
-          <button
-            @click="confirmMigrationWithoutData"
-            :disabled="isProcessing"
-            class="w-full px-4 py-3 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg hover:bg-yellow-200 font-medium text-left"
-          >
-            <div class="flex items-center gap-3">
-              <span class="text-xl">🆕</span>
-              <div>
-                <div class="font-medium">Commencer à zéro</div>
-                <div class="text-sm opacity-90">
-                  Ignorer les données locales et démarrer une nouvelle base
-                </div>
-              </div>
-            </div>
-          </button>
-
-          <!-- Annuler -->
-          <button
-            @click="cancelMigration"
-            :disabled="isProcessing"
-            class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
-          >
-            Annuler
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Boutons d'action -->
     <div class="space-y-3">
       <!-- Appliquer les changements -->
@@ -129,37 +67,24 @@
       </button>
 
       <!-- Actions pour stockage local uniquement -->
-      <div v-if="currentStorageType === 'local'" class="space-y-4 pt-6 border-t border-gray-200">
-        <h4 class="text-base font-semibold text-gray-700 flex items-center gap-2">
-          🛠️ Actions sur les données locales
-        </h4>
+      <div v-if="currentStorageType === 'local'" class="space-y-2 pt-4 border-t">
+        <h4 class="font-medium text-gray-700">Actions sur les données locales :</h4>
 
-        <div class="grid grid-cols-2 gap-3">
-          <!-- Export -->
+        <div class="flex space-x-2">
           <button
             @click="exportData"
-            class="flex items-center justify-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition"
+            class="flex-1 px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200"
           >
             📤 Exporter
           </button>
 
-          <!-- Import -->
           <button
             @click="triggerImport"
-            class="flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition"
+            class="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
           >
             📥 Importer
           </button>
         </div>
-
-        <!-- Input réellement invisible -->
-        <input
-          ref="fileInput"
-          type="file"
-          accept=".json"
-          @change="importData"
-          style="display: none"
-        />
       </div>
     </div>
 
@@ -194,7 +119,6 @@ const isProcessing = ref<boolean>(false)
 const periodsCount = ref<number>(0)
 const statusMessage = ref<string>('')
 const fileInput = ref<HTMLInputElement | null>(null)
-const showMigrationModal = ref<boolean>(false)
 
 // Classes CSS pour les messages
 const statusClass = computed<string>(() => {
@@ -204,68 +128,40 @@ const statusClass = computed<string>(() => {
   return 'bg-green-100 border border-green-300 text-green-800'
 })
 
+// Dans le setup, après les ref :
+watch(selectedStorageType, (newValue, oldValue) => {
+  console.log('selectedStorageType changed:', oldValue, '->', newValue)
+  console.log('Button should be visible:', newValue !== currentStorageType.value)
+})
+
+watch(currentStorageType, (newValue, oldValue) => {
+  console.log('currentStorageType changed:', oldValue, '->', newValue)
+})
+
 // Changer le type de stockage
 const applyStorageChange = async (): Promise<void> => {
+  console.log('=== applyStorageChange CALLED ===')
+  console.log('selectedStorageType:', selectedStorageType.value)
+  console.log('currentStorageType:', currentStorageType.value)
+
   if (selectedStorageType.value === currentStorageType.value) {
+    console.log('Same storage type, returning early')
     return
   }
+  if (selectedStorageType.value === currentStorageType.value) return
 
-  // Si on passe de local à Firebase ET qu'on a des données locales
-  if (
-    currentStorageType.value === 'local' &&
-    selectedStorageType.value === 'firebase' &&
-    periodsCount.value > 0
-  ) {
-    showMigrationModal.value = true
-    return
-  }
-
-  // Migration directe pour les autres cas
-  await performMigration(selectedStorageType.value === 'firebase')
-}
-
-// Confirmer migration avec transfert des données
-const confirmMigrationWithData = async (): Promise<void> => {
-  showMigrationModal.value = false
-  await performMigration(true, true)
-}
-
-// Confirmer migration sans transfert des données
-const confirmMigrationWithoutData = async (): Promise<void> => {
-  showMigrationModal.value = false
-  await performMigration(true, false)
-}
-
-// Annuler la migration
-const cancelMigration = (): void => {
-  showMigrationModal.value = false
-  selectedStorageType.value = currentStorageType.value // Revenir à l'état précédent
-}
-
-// Effectuer la migration
-const performMigration = async (
-  toFirebase: boolean,
-  transferData: boolean = true,
-): Promise<void> => {
   isProcessing.value = true
   statusMessage.value = ''
 
   try {
     let migratedCount = 0
 
-    if (toFirebase) {
-      if (transferData) {
-        // Transférer les données locales vers Firebase
-        migratedCount = await storageService.migrateToFirebaseWithData()
-        statusMessage.value = `✅ Migration réussie ! ${migratedCount} période(s) transférée(s) vers Firebase.`
-      } else {
-        // Juste changer le type de stockage sans transférer
-        await storageService.switchToFirebase()
-        statusMessage.value = `✅ Stockage Firebase activé. Nouvelle base de données créée.`
-      }
-    } else {
+    if (selectedStorageType.value === 'local') {
       migratedCount = await storageService.migrateToLocal()
       statusMessage.value = `✅ Migration réussie ! ${migratedCount} période(s) transférée(s) vers le stockage local.`
+    } else {
+      migratedCount = await storageService.migrateToFirebase()
+      statusMessage.value = `✅ Migration réussie ! ${migratedCount} période(s) transférée(s) vers Firebase.`
     }
 
     currentStorageType.value = selectedStorageType.value
@@ -284,6 +180,8 @@ const performMigration = async (
       statusMessage.value = ''
     }, 5000)
   }
+  console.log('Storage changed to:', currentStorageType.value)
+  console.log('Router should redirect...')
 }
 
 // Export des données locales

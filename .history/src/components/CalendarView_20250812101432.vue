@@ -2,14 +2,11 @@
   <div class="min-h-screen bg-gradient-to-b from-pink-50 to-gray-100 py-8 px-4">
     <div class="max-w-screen-md mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-8">
       <!-- Titre principal avec bouton d'aide -->
-      <div class="relative flex items-center justify-center w-full">
-        <!-- Titre centré -->
+      <div class="flex items-center justify-center gap-4">
         <h1 class="text-4xl font-extrabold text-pink-600 tracking-tight">D-Day</h1>
-
-        <!-- Bouton d'aide aligné à droite -->
         <button
           @click="showHelp = true"
-          class="absolute right-0 w-8 h-8 bg-pink-100 hover:bg-pink-200 text-pink-600 rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2"
+          class="w-8 h-8 bg-pink-100 hover:bg-pink-200 text-pink-600 rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2"
           title="Aide et informations"
         >
           ?
@@ -179,24 +176,6 @@
                 médicale.
               </p>
             </section>
-            <!-- Développeurs -->
-            <section class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-              <h3 class="text-lg font-semibold text-yellow-800 mb-2 flex items-center gap-2">
-                🐞 Signaler un bug
-              </h3>
-              <p class="text-yellow-700 text-sm leading-relaxed">
-                Si vous rencontrez une anomalie ou souhaitez proposer des améliorations, vous pouvez
-                créer une issue directement sur GitHub :
-                <a
-                  href="https://github.com/antoinecarto/d_day/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-blue-600 hover:underline break-all"
-                >
-                  https://github.com/antoinecarto/d_day/issues
-                </a>
-              </p>
-            </section>
           </div>
 
           <!-- Pied de page du modal -->
@@ -294,24 +273,29 @@
             La nouvelle durée s'appliquera aux prochains cycles enregistrés.
           </p>
         </div>
+
         <!-- Liste des périodes -->
-        <div
-          class="overflow-y-auto border border-gray-200 rounded-md divide-y divide-gray-100"
-          style="max-height: 80px; overflow-y: auto"
-        >
+        <div class="bg-white rounded-lg shadow-md p-4">
+          <h3 class="text-sm font-semibold text-gray-700 mb-2">📅 Périodes enregistrées</h3>
+
           <div
-            v-for="period in allPeriods"
-            :key="period.id"
-            class="flex justify-between items-center px-4 py-3 text-sm hover:bg-gray-50 transition"
+            class="overflow-y-auto border border-gray-200 rounded-md divide-y divide-gray-100 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+            style="max-height: 150px"
           >
-            <span class="font-medium text-gray-800">{{ formatDate(period.startDate) }}</span>
-            <button
-              @click="deleteById(period.id)"
-              class="text-red-500 hover:text-red-700 text-lg focus:outline-none"
-              aria-label="Supprimer cette date"
+            <div
+              v-for="period in allPeriods"
+              :key="period.id"
+              class="flex justify-between items-center px-4 py-3 text-sm hover:bg-gray-50 transition"
             >
-              ❌
-            </button>
+              <span class="font-medium text-gray-800">{{ formatDate(period.startDate) }}</span>
+              <button
+                @click="deleteById(period.id)"
+                class="text-red-500 hover:text-red-700 text-lg focus:outline-none"
+                aria-label="Supprimer cette date"
+              >
+                ❌
+              </button>
+            </div>
           </div>
         </div>
 
@@ -444,7 +428,7 @@ const loadPeriods = async () => {
         },
       ]
     })
-    averageCycleDuration.value = calculateAverageCycle(periods)
+
     calendarAttributes.value = newAttributes
   } catch (error) {
     console.error('Erreur chargement périodes:', error)
@@ -528,23 +512,6 @@ const confirmDeletion = async (date) => {
     alert('Erreur lors de la suppression')
   }
 }
-// Calcul durée moyenne
-const averageCycleDuration = ref(null)
-
-const calculateAverageCycle = (periods) => {
-  if (periods.length < 2) return null
-
-  const durations = []
-  for (let i = 0; i < periods.length - 1; i++) {
-    const current = periods[i].startDate
-    const next = periods[i + 1].startDate
-    const diff = Math.floor((current - next) / (1000 * 60 * 60 * 24)) // en jours
-    durations.push(diff)
-  }
-
-  const sum = durations.reduce((a, b) => a + b, 0)
-  return Math.round(sum / durations.length)
-}
 
 // Gérer le changement de type de stockage
 const onStorageChanged = (newStorageType) => {
@@ -593,22 +560,5 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-.scrollable {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e0 #f7fafc;
-}
-
-/* Pour Chrome */
-.scrollable::-webkit-scrollbar {
-  width: 6px;
-}
-.scrollable::-webkit-scrollbar-thumb {
-  background-color: #cbd5e0;
-  border-radius: 4px;
-}
-.scrollable::-webkit-scrollbar-track {
-  background-color: #f7fafc;
 }
 </style>

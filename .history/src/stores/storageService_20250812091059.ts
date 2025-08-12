@@ -47,11 +47,6 @@ class StorageService {
     localStorage.setItem('storageType', type)
   }
 
-  // Méthode pour définir la préférence de stockage (alias pour compatibilité)
-  setStoragePreference(storageType: StorageType): void {
-    this.setStorageType(storageType)
-  }
-
   // Interface unifiée pour sauvegarder une période
   async savePeriod(periodData: CreatePeriodData): Promise<string | null> {
     if (this._storageType === 'local') {
@@ -214,127 +209,6 @@ class StorageService {
     }
   }
 
-  // --- NOUVELLES MÉTHODES POUR MIGRATION AVEC OPTIONS ---
-
-  /**
-   * Migrer vers Firebase en transférant toutes les données locales
-   * @returns Le nombre de périodes migrées
-   */
-  async migrateToFirebaseWithData(): Promise<number> {
-    if (!this.isUserConnected()) {
-      throw new Error('Vous devez être connecté pour migrer vers Firebase')
-    }
-
-    try {
-      // 1. Charger toutes les données du localStorage
-      const localPeriods = this.getLocalPeriods()
-
-      if (localPeriods.length === 0) {
-        // Pas de données à migrer, juste changer le type de stockage
-        this.setStorageType('firebase')
-        return 0
-      }
-
-      // 2. Vérifier si Firebase a déjà des données
-      const existingFirebasePeriods = await this.loadPeriodsFromFirebaseRaw()
-
-      // 3. Fusionner les données (éviter les doublons par startDate)
-      const mergedPeriods = this.mergePeriodsByStartDate(localPeriods, existingFirebasePeriods)
-
-      // 4. Sauvegarder toutes les données dans Firebase via la collection
-      let migratedCount = 0
-      for (const period of localPeriods) {
-        const { id, ...periodData } = period
-        const saved = await this.saveToFirebase(periodData)
-        if (saved) migratedCount++
-      }
-
-      // 5. Changer la préférence de stockage
-      this.setStorageType('firebase')
-
-      return migratedCount
-    } catch (error) {
-      console.error('Error during migration to Firebase:', error)
-      throw new Error(
-        `Erreur lors de la migration : ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
-      )
-    }
-  }
-
-  /**
-   * Activer Firebase sans transférer les données locales
-   * (commence avec une base de données vide sur Firebase)
-   */
-  async switchToFirebase(): Promise<void> {
-    if (!this.isUserConnected()) {
-      throw new Error('Vous devez être connecté pour utiliser Firebase')
-    }
-
-    try {
-      // 1. Simplement changer la préférence de stockage
-      this.setStorageType('firebase')
-    } catch (error) {
-      console.error('Error switching to Firebase:', error)
-      throw new Error(
-        `Erreur lors du changement vers Firebase : ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
-      )
-    }
-  }
-
-  // --- MÉTHODES UTILITAIRES POUR LA MIGRATION ---
-
-  /**
-   * Charger les périodes depuis Firebase sans passer par l'interface unifiée
-   * @returns Tableau des périodes Firebase
-   */
-  private async loadPeriodsFromFirebaseRaw(): Promise<PeriodData[]> {
-    try {
-      const user = auth.currentUser
-      if (!user?.uid) return []
-
-      const periodsCollectionRef = collection(db, 'users', user.uid, 'periods')
-      const q = query(periodsCollectionRef, orderBy('createdAt', 'desc'))
-      const snapshot = await getDocs(q)
-
-      return snapshot.docs.map(
-        (doc): PeriodData => ({
-          id: doc.id,
-          startDate: doc.data().startDate,
-          predictedDate: doc.data().predictedDate,
-          createdAt: doc.data().createdAt,
-        }),
-      )
-    } catch (error) {
-      console.error('Error loading from Firebase:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Fusionner les périodes en évitant les doublons par startDate
-   * @param localPeriods Périodes du localStorage
-   * @param firebasePeriods Périodes existantes dans Firebase
-   * @returns Tableau fusionné sans doublons
-   */
-  private mergePeriodsByStartDate(
-    localPeriods: PeriodData[],
-    firebasePeriods: PeriodData[],
-  ): PeriodData[] {
-    const merged = [...firebasePeriods]
-    const existingStartDates = new Set(firebasePeriods.map((p) => p.startDate))
-
-    // Ajouter les périodes locales qui n'existent pas déjà dans Firebase
-    for (const localPeriod of localPeriods) {
-      if (!existingStartDates.has(localPeriod.startDate)) {
-        merged.push(localPeriod)
-      } else {
-      }
-    }
-
-    // Trier par date (le plus récent en premier)
-    return merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  }
-
   // Vérification de la connectivité pour Firebase
   isUserConnected(): boolean {
     return !!auth.currentUser
@@ -349,9 +223,23 @@ class StorageService {
     const url = URL.createObjectURL(dataBlob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `d-day_data_local_${new Date().toISOString().split('T')[0]}.json`
+    link.download = `menstrual-data-${new Date().toISOString().split('T')[0]}.json`
     link.click()
     URL.revokeObjectURL(url)
+  }
+
+  // Migrer vers Firebase en transférant les données locales
+  async migrateToFirebaseWithData(): Promise<number> {
+    // 1. Charger les données du localStorage
+    // 2. Les sauvegarder dans Firebase
+    // 3. Changer le type de stockage
+    // 4. Retourner le nombre d'éléments migrés
+  }
+
+  // Juste activer Firebase sans transfert
+  async switchToFirebase(): Promise<void> {
+    // Changer simplement le type de stockage vers Firebase
+    // sans transférer les données locales
   }
 
   async importLocalData(file: File): Promise<number> {

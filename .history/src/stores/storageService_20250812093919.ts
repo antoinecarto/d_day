@@ -221,6 +221,8 @@ class StorageService {
    * @returns Le nombre de périodes migrées
    */
   async migrateToFirebaseWithData(): Promise<number> {
+    console.log('=== Starting migration to Firebase with data ===')
+
     if (!this.isUserConnected()) {
       throw new Error('Vous devez être connecté pour migrer vers Firebase')
     }
@@ -228,6 +230,7 @@ class StorageService {
     try {
       // 1. Charger toutes les données du localStorage
       const localPeriods = this.getLocalPeriods()
+      console.log(`Found ${localPeriods.length} periods in local storage`)
 
       if (localPeriods.length === 0) {
         // Pas de données à migrer, juste changer le type de stockage
@@ -237,9 +240,11 @@ class StorageService {
 
       // 2. Vérifier si Firebase a déjà des données
       const existingFirebasePeriods = await this.loadPeriodsFromFirebaseRaw()
+      console.log(`Found ${existingFirebasePeriods.length} periods in Firebase`)
 
       // 3. Fusionner les données (éviter les doublons par startDate)
       const mergedPeriods = this.mergePeriodsByStartDate(localPeriods, existingFirebasePeriods)
+      console.log(`Merged data: ${mergedPeriods.length} total periods`)
 
       // 4. Sauvegarder toutes les données dans Firebase via la collection
       let migratedCount = 0
@@ -252,6 +257,7 @@ class StorageService {
       // 5. Changer la préférence de stockage
       this.setStorageType('firebase')
 
+      console.log('Migration to Firebase completed successfully')
       return migratedCount
     } catch (error) {
       console.error('Error during migration to Firebase:', error)
@@ -266,6 +272,8 @@ class StorageService {
    * (commence avec une base de données vide sur Firebase)
    */
   async switchToFirebase(): Promise<void> {
+    console.log('=== Switching to Firebase without data transfer ===')
+
     if (!this.isUserConnected()) {
       throw new Error('Vous devez être connecté pour utiliser Firebase')
     }
@@ -273,6 +281,8 @@ class StorageService {
     try {
       // 1. Simplement changer la préférence de stockage
       this.setStorageType('firebase')
+
+      console.log('Successfully switched to Firebase storage')
     } catch (error) {
       console.error('Error switching to Firebase:', error)
       throw new Error(
@@ -328,6 +338,9 @@ class StorageService {
       if (!existingStartDates.has(localPeriod.startDate)) {
         merged.push(localPeriod)
       } else {
+        console.log(
+          `Period with startDate ${localPeriod.startDate} already exists in Firebase, skipping`,
+        )
       }
     }
 

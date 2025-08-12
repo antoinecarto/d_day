@@ -49,18 +49,24 @@ router.beforeEach(async (to, from, next) => {
     console.log('Going to /calendar - checking access...')
 
     if (storagePreference === 'firebase') {
+      console.log('Firebase mode - checking user auth...')
       // Mode cloud : vérifier l'authentification Firebase
       const user = await getCurrentUser()
+      console.log('Current user:', user?.email || 'not connected')
 
       if (!user) {
+        console.log('Not authenticated - redirecting to login')
         return next('/login') // pas connecté → login
       } else {
+        console.log('Authenticated - allowing access to calendar')
         return next()
       }
     } else if (storagePreference === 'local') {
+      console.log('Local mode - allowing direct access')
       // Mode local : accès direct autorisé
       return next()
     } else {
+      console.log('No storage preference - redirecting to login')
       // Pas de préférence définie → aller vers login pour choisir
       return next('/login')
     }
@@ -68,9 +74,11 @@ router.beforeEach(async (to, from, next) => {
 
   // Si on va vers /login et qu'on est déjà en mode local, rediriger vers calendar
   if (to.path === '/login' && storagePreference === 'local') {
+    console.log('Going to login but already in local mode - redirecting to calendar')
     return next('/calendar')
   }
 
+  console.log('Default - allowing navigation')
   next() // autorisé dans tous les autres cas
 })
 
