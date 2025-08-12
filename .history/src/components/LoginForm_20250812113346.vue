@@ -8,6 +8,27 @@
         </p>
       </div>
 
+<<<<<<< HEAD
+    <div class="login-form text-gray-900">
+      <h2 v-if="mode === 'login'">Connexion</h2>
+      <h2 v-else>Inscription</h2>
+
+      <form @submit.prevent="submit">
+        <input type="email" v-model="email" placeholder="Email" required autocomplete="username" class="text-gray-900"/>
+        <input
+          type="password"
+          v-model="password"
+          placeholder="Mot de passe"
+          required
+          autocomplete="current-password"
+          class="text-gray-900"
+        />
+
+        <button :disabled="isLoading" type="submit" class="text-gray-900">
+          {{ mode === 'login' ? 'Se connecter' : "S'inscrire" }}
+        </button>
+      </form>
+=======
       <!-- Options de stockage -->
       <div class="bg-white shadow rounded-lg p-6 space-y-6">
         <!-- Stockage local -->
@@ -66,6 +87,7 @@
         <div v-if="selectedOption === 'firebase'" class="border-t pt-4 space-y-4">
           <div v-if="!isConnected">
             <h4 class="font-medium text-gray-800 mb-3">Connexion à votre compte</h4>
+>>>>>>> 7e82a1f (mise en place d'un système de localStorage + cloud)
 
             <div class="space-y-3">
               <div>
@@ -92,6 +114,7 @@
                 />
               </div>
             </div>
+
 
             <div class="flex space-x-2 mt-4">
               <button
@@ -226,6 +249,7 @@ const signUp = async () => {
 
 // Démarrer l'application
 const startApp = async () => {
+
   // Configurer le type de stockage
   storageService.setStorageType(selectedOption.value)
 
@@ -264,6 +288,8 @@ const getErrorMessage = (errorCode) => {
 
 // Vérifier l'état de connexion au montage
 onMounted(() => {
+
+
   // Écouter les changements d'authentification
   onAuthStateChanged(auth, (user) => {
     currentUser.value = user

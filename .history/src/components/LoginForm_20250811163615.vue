@@ -226,19 +226,26 @@ const signUp = async () => {
 
 // Démarrer l'application
 const startApp = async () => {
+  console.log('=== START APP CALLED ===')
+  console.log('selectedOption BEFORE setStorageType:', selectedOption.value)
+
   // Configurer le type de stockage
   storageService.setStorageType(selectedOption.value)
 
   // Vérifier que ça a bien été sauvegardé
+  console.log('Storage preference AFTER setStorageType:', storageService.getStoragePreference())
 
   // Attendre un peu pour être sûr que c'est sauvegardé
   await new Promise((resolve) => setTimeout(resolve, 100))
 
   if (selectedOption.value === 'local') {
+    console.log('Navigating to calendar (local mode)')
     await router.push('/calendar')
   } else if (selectedOption.value === 'firebase' && isConnected.value) {
+    console.log('Navigating to calendar (firebase mode)')
     await router.push('/calendar')
   } else {
+    console.log('Cannot navigate - not connected to firebase')
   }
 }
 
@@ -264,6 +271,17 @@ const getErrorMessage = (errorCode) => {
 
 // Vérifier l'état de connexion au montage
 onMounted(() => {
+  console.log('=== DEBUG LOGIN FORM ===')
+  console.log('selectedOption:', selectedOption.value)
+  console.log('isConnected:', isConnected.value)
+  console.log('currentUser:', currentUser.value)
+  console.log('Current storage preference:', storageService.getStoragePreference())
+  // // Vérifier s'il y a une préférence stockée
+  // const storedPreference = storageService.getStoragePreference()
+  // if (storedPreference) {
+  //   selectedOption.value = storedPreference
+  // }
+
   // Écouter les changements d'authentification
   onAuthStateChanged(auth, (user) => {
     currentUser.value = user

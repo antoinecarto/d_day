@@ -158,7 +158,6 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth'
 import storageService from '@/stores/storageService'
-import { useRouter } from 'vue-router'
 
 const emit = defineEmits(['login-success'])
 
@@ -170,7 +169,6 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 const currentUser = ref(null)
 const isConnected = ref(false)
-const router = useRouter()
 
 // État calculé
 const canStart = computed(() => {
@@ -226,20 +224,29 @@ const signUp = async () => {
 
 // Démarrer l'application
 const startApp = async () => {
+  console.log('=== START APP CALLED ===')
+  console.log('selectedOption:', selectedOption.value)
+  console.log('canStart:', canStart.value)
+  console.log('isLoading:', isLoading.value)
+
   // Configurer le type de stockage
   storageService.setStorageType(selectedOption.value)
+  console.log('Storage type set to:', selectedOption.value)
 
-  // Vérifier que ça a bien été sauvegardé
-
-  // Attendre un peu pour être sûr que c'est sauvegardé
-  await new Promise((resolve) => setTimeout(resolve, 100))
-
+  // Naviguer vers le calendrier
   if (selectedOption.value === 'local') {
+    console.log('Navigating to calendar (local mode)')
     await router.push('/calendar')
   } else if (selectedOption.value === 'firebase' && isConnected.value) {
+    console.log('Navigating to calendar (firebase mode)')
     await router.push('/calendar')
-  } else {
   }
+
+  // Émettre l'événement de succès
+  emit('login-success', {
+    storageType: selectedOption.value,
+    user: currentUser.value,
+  })
 }
 
 // Messages d'erreur Firebase
@@ -264,6 +271,17 @@ const getErrorMessage = (errorCode) => {
 
 // Vérifier l'état de connexion au montage
 onMounted(() => {
+  console.log('=== DEBUG LOGIN FORM ===')
+  console.log('selectedOption:', selectedOption.value)
+  console.log('isConnected:', isConnected.value)
+  console.log('currentUser:', currentUser.value)
+  console.log('Current storage preference:', storageService.getStoragePreference())
+  // // Vérifier s'il y a une préférence stockée
+  // const storedPreference = storageService.getStoragePreference()
+  // if (storedPreference) {
+  //   selectedOption.value = storedPreference
+  // }
+
   // Écouter les changements d'authentification
   onAuthStateChanged(auth, (user) => {
     currentUser.value = user
