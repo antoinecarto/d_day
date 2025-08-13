@@ -15,7 +15,7 @@
           ?
         </button>
       </div>
-      <HelpPopup :class="popup" :show="showHelp" @close="showHelp = false" />
+      <HelpPopup :class="popup" :dark="text - black" :show="showHelp" @close="showHelp = false" />
       <!-- Calendrier -->
       <div class="flex justify-center">
         <v-calendar
@@ -399,7 +399,6 @@ onMounted(() => {
   z-index: 100;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  color: black !important;
 }
 .dot {
   height: 12px;

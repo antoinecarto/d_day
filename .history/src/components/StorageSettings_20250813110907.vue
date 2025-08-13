@@ -52,8 +52,8 @@
     <!-- Popup de connexion Firebase -->
     <div
       v-if="showLoginModal"
-      class="bg-white p-6 space-y-4"
-      style="background: rgba(0, 0, 0, 0); backdrop-filter: blur(4px)"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px)"
       @click.self="cancelLogin"
     >
       <div
@@ -78,7 +78,7 @@
         <div class="p-6 space-y-4">
           <p class="text-gray-600">Vous devez vous connecter pour utiliser le stockage en ligne.</p>
 
-          <div class="p-6 space-y-4">
+          <div class="space-y-4">
             <div>
               <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -187,6 +187,7 @@
 
           <div class="pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
             <p><strong>Première fois ?</strong> Cliquez sur "S'inscrire" pour créer un compte.</p>
+            <p><strong>Mot de passe oublié ?</strong> Contactez le support.</p>
           </div>
         </div>
       </div>
@@ -195,36 +196,37 @@
     <!-- Popup de confirmation pour migration vers Firebase -->
     <div
       v-if="showMigrationModal"
-      class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+      class="fixed inset-0 flex items-center justify-center p-4"
+      style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 9999"
       @click.self="cancelMigration"
     >
       <div
-        class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto overflow-y-auto max-h-[90vh] animate-slideIn"
+        class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto"
+        style="animation: slideIn 0.2s ease-out; max-height: 90vh; overflow-y: auto"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-200">
-          <h4 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <div class="flex items-center justify-between p-6 border-b border-gray-100">
+          <h4 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
             🔄 Migration vers Firebase
           </h4>
           <button
             @click="cancelMigration"
-            class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+            class="text-gray-400 hover:text-gray-600 text-2xl leading-none"
             :disabled="isProcessing"
           >
             ×
           </button>
         </div>
-
         <!-- Content -->
         <div class="p-6 space-y-4">
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p class="text-blue-900 font-medium mb-2">📊 Données existantes détectées</p>
-            <p class="text-blue-800 text-sm">
+            <p class="text-blue-800 font-medium mb-2">📊 Données existantes détectées</p>
+            <p class="text-blue-700 text-sm">
               Vous avez <strong>{{ periodsCount }} période(s)</strong> enregistrée(s) localement.
             </p>
           </div>
 
-          <p class="text-gray-800">Que souhaitez-vous faire avec ces données ?</p>
+          <p class="text-gray-700">Que souhaitez-vous faire avec ces données ?</p>
 
           <div class="space-y-3">
             <!-- Option 1: Transférer les données -->
@@ -236,8 +238,8 @@
               <div class="flex items-center gap-3">
                 <div class="text-2xl group-hover:scale-110 transition-transform">📤</div>
                 <div class="flex-1">
-                  <div class="font-medium text-blue-900">Transférer vers Firebase</div>
-                  <div class="text-sm text-blue-700 mt-1">
+                  <div class="font-medium text-blue-800">Transférer vers Firebase</div>
+                  <div class="text-sm text-blue-600 mt-1">
                     Copier toutes les données locales vers le cloud
                   </div>
                 </div>
@@ -253,8 +255,8 @@
               <div class="flex items-center gap-3">
                 <div class="text-2xl group-hover:scale-110 transition-transform">🆕</div>
                 <div class="flex-1">
-                  <div class="font-medium text-yellow-900">Commencer à zéro</div>
-                  <div class="text-sm text-yellow-700 mt-1">
+                  <div class="font-medium text-yellow-800">Commencer à zéro</div>
+                  <div class="text-sm text-yellow-600 mt-1">
                     Ignorer les données locales et démarrer une nouvelle base
                   </div>
                 </div>
@@ -263,11 +265,11 @@
           </div>
 
           <!-- Annuler -->
-          <div class="pt-4 border-t border-gray-200">
+          <div class="pt-4 border-t border-gray-100">
             <button
               @click="cancelMigration"
               :disabled="isProcessing"
-              class="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+              class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
             >
               Annuler
             </button>
@@ -275,6 +277,7 @@
         </div>
       </div>
     </div>
+
     <!-- Boutons d'action -->
     <div class="space-y-3">
       <!-- Appliquer les changements -->

@@ -15,7 +15,202 @@
           ?
         </button>
       </div>
-      <HelpPopup :class="popup" :show="showHelp" @close="showHelp = false" />
+
+      <!-- Modal d'aide -->
+      <div
+        v-if="showHelp"
+        class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg"
+        @click="showHelp = false"
+      >
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @click.stop>
+          <!-- En-tête du modal -->
+          <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl font-bold text-pink-600 flex items-center gap-2">
+                ❓ Guide d'utilisation D-Day
+              </h2>
+              <button
+                @click="showHelp = false"
+                class="text-gray-400 hover:text-gray-600 text-2xl leading-none focus:outline-none"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenu du modal -->
+          <div class="px-6 py-6 space-y-6">
+            <!-- Section 1: Qu'est-ce que D-Day -->
+            <section>
+              <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                🌸 Qu'est-ce que D-Day ?
+              </h3>
+              <p class="text-gray-600 leading-relaxed">
+                D-Day est votre assistant personnel pour suivre votre cycle menstruel. L'application
+                vous aide à prévoir vos prochaines règles et votre période d'ovulation en se basant
+                sur vos cycles précédents.
+              </p>
+            </section>
+
+            <!-- Section 2: Comment utiliser -->
+            <section>
+              <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                📅 Comment utiliser l'application
+              </h3>
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <span
+                    class="inline-block w-6 h-6 bg-red-500 rounded-full mt-1 flex-shrink-0"
+                  ></span>
+                  <div>
+                    <strong class="text-gray-800">Enregistrer le début de vos règles :</strong>
+                    <p class="text-gray-600">
+                      Cliquez sur la date du premier jour de vos règles dans le calendrier.
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <span
+                    class="inline-block w-6 h-6 bg-pink-400 rounded-full mt-1 flex-shrink-0"
+                  ></span>
+                  <div>
+                    <strong class="text-gray-800">Prédictions automatiques :</strong>
+                    <p class="text-gray-600">
+                      L'application calcule automatiquement vos prochaines règles estimées.
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <span
+                    class="inline-block w-6 h-6 bg-green-500 rounded-full mt-1 flex-shrink-0"
+                  ></span>
+                  <div>
+                    <strong class="text-gray-800">Période d'ovulation :</strong>
+                    <p class="text-gray-600">
+                      Visualisez votre période d'ovulation maximale pour une meilleure
+                      planification.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Section 3: Fonctionnalités avancées -->
+            <section>
+              <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                ⚙️ Fonctionnalités avancées
+              </h3>
+              <div class="space-y-3 text-gray-600">
+                <div class="flex items-start gap-2">
+                  <span class="text-pink-500 mt-1">•</span>
+                  <span
+                    ><strong>Durée du cycle personnalisable :</strong> Ajustez la durée de votre
+                    cycle dans les paramètres (20-40 jours)</span
+                  >
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-pink-500 mt-1">•</span>
+                  <span
+                    ><strong>Suppression :</strong> Appui long sur une date ou clic droit pour
+                    supprimer une entrée</span
+                  >
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-pink-500 mt-1">•</span>
+                  <span
+                    ><strong>Stockage flexible :</strong> Choisissez entre stockage local 'anonymat
+                    complet' (enregistrement des données en local, pas besoin d'authentification) ou
+                    synchronisation cloud 'anonymat partiel' (D-Day ne connait pas votre IP, mais
+                    celle-ci est stockée par Google)</span
+                  >
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-pink-500 mt-1">•</span>
+                  <span
+                    ><strong>Export/Import :</strong> Sauvegardez et restaurez vos données
+                    facilement</span
+                  >
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-pink-500 mt-1">•</span>
+                  <span
+                    ><strong>Passage du local au cloud :</strong> Si vous choisissez de passer du
+                    local vers le cloud, vous aurez l'opportunité de mettre à jour la base de
+                    données</span
+                  >
+                  Firebase ou pas. A vous de choisir.
+                </div>
+              </div>
+            </section>
+
+            <!-- Section 4: Conseils -->
+            <section class="bg-pink-50 p-4 rounded-lg">
+              <h3 class="text-xl font-semibold text-pink-800 mb-3 flex items-center gap-2">
+                💡 Conseils d'utilisation
+              </h3>
+              <div class="space-y-2 text-pink-700">
+                <p class="flex items-start gap-2">
+                  <span class="mt-1">•</span>
+                  <span
+                    >Enregistrez régulièrement le début de vos règles pour des prédictions plus
+                    précises</span
+                  >
+                </p>
+                <p class="flex items-start gap-2">
+                  <span class="mt-1">•</span>
+                  <span>Les prédictions s'améliorent avec le temps et plus de données</span>
+                </p>
+                <p class="flex items-start gap-2">
+                  <span class="mt-1">•</span>
+                  <span>N'hésitez pas à ajuster la durée de votre cycle si elle change</span>
+                </p>
+              </div>
+            </section>
+
+            <!-- Section 5: Avertissement médical -->
+            <section class="bg-pink-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                ⚠️ Avertissement médical
+              </h3>
+              <p class="text-yellow-700 text-sm leading-relaxed">
+                Cette application est un outil de suivi personnel et ne remplace pas l'avis d'un
+                professionnel de santé. Les prédictions sont basées sur des moyennes statistiques et
+                peuvent varier selon chaque personne. Consultez un médecin pour toute préoccupation
+                médicale.
+              </p>
+            </section>
+            <!-- Développeurs -->
+            <section class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+              <h3 class="text-lg font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                🐞 Signaler un bug
+              </h3>
+              <p class="text-yellow-700 text-sm leading-relaxed">
+                Si vous rencontrez une anomalie ou souhaitez proposer des améliorations, vous pouvez
+                créer une issue directement sur GitHub :
+                <a
+                  href="https://github.com/antoinecarto/d_day/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:underline break-all"
+                >
+                  https://github.com/antoinecarto/d_day/issues
+                </a>
+              </p>
+            </section>
+          </div>
+
+          <!-- Pied de page du modal -->
+          <div class="sticky bottom-0 bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200">
+            <button
+              @click="showHelp = false"
+              class="w-full px-4 py-2 bg-pink-600 text-white rounded-lg font-medium hover:bg-pink-700 transition-colors"
+            >
+              J'ai compris
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Calendrier -->
       <div class="flex justify-center">
         <v-calendar
@@ -28,7 +223,7 @@
           @daytouchend="cancelLongPress"
           @daycontextmenu="onDayRightClick"
           :disabled="isSaving"
-          class="w-full max-w-lg rounded-lg shadow-sm"
+          class="w-full max-w-md rounded-lg shadow-sm"
         />
       </div>
 
@@ -136,6 +331,7 @@
               ⌄
             </span>
           </button>
+
           <transition name="fade">
             <div v-if="showStorageSettings" class="px-4 py-4 border-t border-pink-300">
               <StorageSettings @storage-changed="onStorageChanged" />
@@ -151,7 +347,6 @@
 import { ref, onMounted, watch } from 'vue'
 import storageService from '@/stores/storageService'
 import StorageSettings from '@/components/StorageSettings.vue'
-import HelpPopup from '@/components/HelpPopup.vue'
 
 const selectedDates = ref([])
 const calendarAttributes = ref([])
@@ -359,22 +554,6 @@ const onStorageChanged = (newStorageType) => {
   loadPeriods() // Recharger les données
 }
 
-// Fonctions pour gérer la popup
-const confirmMigrationWithData = async () => {
-  showMigrationModal.value = false
-  await performMigration(true, true)
-}
-
-const confirmMigrationWithoutData = async () => {
-  showMigrationModal.value = false
-  await performMigration(true, false)
-}
-
-const cancelMigration = () => {
-  showMigrationModal.value = false
-  selectedStorageType.value = currentStorageType.value
-}
-
 watch(cycleDuration, (newVal, oldVal) => {
   if (selectedDates.value.length && newVal !== oldVal) {
     userHasChangedCycle.value = true
@@ -388,19 +567,6 @@ onMounted(() => {
 </script>
 
 <style>
-.popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  border: 2px solid black;
-  padding: 1em 2em;
-  z-index: 100;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  color: black !important;
-}
 .dot {
   height: 12px;
   width: 12px;

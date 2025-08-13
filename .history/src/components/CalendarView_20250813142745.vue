@@ -138,7 +138,7 @@
           </button>
           <transition name="fade">
             <div v-if="showStorageSettings" class="px-4 py-4 border-t border-pink-300">
-              <StorageSettings @storage-changed="onStorageChanged" />
+              <StorageSettings :class="popup" @storage-changed="onStorageChanged" />
             </div>
           </transition>
         </div>
@@ -399,7 +399,6 @@ onMounted(() => {
   z-index: 100;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  color: black !important;
 }
 .dot {
   height: 12px;

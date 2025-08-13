@@ -15,7 +15,7 @@
           ?
         </button>
       </div>
-      <HelpPopup :class="popup" :show="showHelp" @close="showHelp = false" />
+      <HelpPopup :show="showHelp" @close="showHelp = false" />
       <!-- Calendrier -->
       <div class="flex justify-center">
         <v-calendar
@@ -136,6 +136,15 @@
               ⌄
             </span>
           </button>
+          <MigrationPopup
+            :is-visible="showMigrationModal"
+            :periods-count="periodsCount"
+            :is-processing="isProcessing"
+            @migrate-with-data="confirmMigrationWithData"
+            @migrate-without-data="confirmMigrationWithoutData"
+            @cancel="cancelMigration"
+          />
+
           <transition name="fade">
             <div v-if="showStorageSettings" class="px-4 py-4 border-t border-pink-300">
               <StorageSettings @storage-changed="onStorageChanged" />
@@ -152,6 +161,7 @@ import { ref, onMounted, watch } from 'vue'
 import storageService from '@/stores/storageService'
 import StorageSettings from '@/components/StorageSettings.vue'
 import HelpPopup from '@/components/HelpPopup.vue'
+import MigrationPopup from '@/components/MigrationPopup.vue'
 
 const selectedDates = ref([])
 const calendarAttributes = ref([])
@@ -388,19 +398,6 @@ onMounted(() => {
 </script>
 
 <style>
-.popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  border: 2px solid black;
-  padding: 1em 2em;
-  z-index: 100;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  color: black !important;
-}
 .dot {
   height: 12px;
   width: 12px;

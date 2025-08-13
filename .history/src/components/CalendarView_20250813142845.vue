@@ -399,7 +399,6 @@ onMounted(() => {
   z-index: 100;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  color: black !important;
 }
 .dot {
   height: 12px;

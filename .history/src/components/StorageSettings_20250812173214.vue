@@ -49,232 +49,149 @@
       <div class="mt-1 text-xs text-gray-500">{{ periodsCount }} période(s) enregistrée(s)</div>
     </div>
 
-    <!-- Popup de connexion Firebase -->
+    <!-- Modal de connexion Firebase -->
     <div
       v-if="showLoginModal"
-      class="bg-white p-6 space-y-4"
-      style="background: rgba(0, 0, 0, 0); backdrop-filter: blur(4px)"
-      @click.self="cancelLogin"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div
-        class="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-        style="animation: slideIn 0.2s ease-out"
-      >
-        <!-- Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-100">
-          <h4 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
-            🔐 Connexion Firebase
-          </h4>
+      <div class="bg-white rounded-lg p-6 max-w-md mx-4 w-full">
+        <h4 class="text-lg font-semibold text-gray-800 mb-4">🔐 Connexion Firebase</h4>
+
+        <p class="text-gray-600 mb-4">
+          Vous devez vous connecter pour utiliser le stockage en ligne.
+        </p>
+
+        <div class="space-y-4">
+          <div>
+            <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              v-model="loginEmail"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="votre@email.com"
+            />
+          </div>
+
+          <div>
+            <label for="login-password" class="block text-sm font-medium text-gray-700"
+              >Mot de passe</label
+            >
+            <input
+              id="login-password"
+              type="password"
+              v-model="loginPassword"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <!-- Messages d'erreur -->
+          <div v-if="loginError" class="text-red-600 text-sm bg-red-50 p-3 rounded">
+            {{ loginError }}
+          </div>
+
+          <!-- Boutons d'action -->
+          <div class="flex space-x-3">
+            <button
+              @click="signIn"
+              :disabled="isLoggingIn || !loginEmail || !loginPassword"
+              class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+            >
+              <span v-if="!isLoggingIn">Se connecter</span>
+              <span v-else>Connexion...</span>
+            </button>
+
+            <button
+              @click="signUp"
+              :disabled="isLoggingIn || !loginEmail || !loginPassword"
+              class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+            >
+              <span v-if="!isLoggingIn">S'inscrire</span>
+              <span v-else>Inscription...</span>
+            </button>
+          </div>
+
           <button
             @click="cancelLogin"
-            class="text-gray-400 hover:text-gray-600 text-2xl leading-none"
             :disabled="isLoggingIn"
+            class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
           >
-            ×
+            Annuler
           </button>
         </div>
 
-        <!-- Content -->
-        <div class="p-6 space-y-4">
-          <p class="text-gray-600">Vous devez vous connecter pour utiliser le stockage en ligne.</p>
-
-          <div class="p-6 space-y-4">
-            <div>
-              <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                id="login-email"
-                type="email"
-                v-model="loginEmail"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="votre@email.com"
-                :disabled="isLoggingIn"
-              />
-            </div>
-
-            <div>
-              <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">
-                Mot de passe
-              </label>
-              <input
-                id="login-password"
-                type="password"
-                v-model="loginPassword"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="••••••••"
-                :disabled="isLoggingIn"
-                @keyup.enter="signIn"
-              />
-            </div>
-
-            <!-- Messages d'erreur -->
-            <div
-              v-if="loginError"
-              class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
-            >
-              <div class="flex items-center gap-2">
-                <span>⚠️</span>
-                <span>{{ loginError }}</span>
-              </div>
-            </div>
-
-            <!-- Boutons d'action -->
-            <div class="flex gap-3">
-              <button
-                @click="signIn"
-                :disabled="isLoggingIn || !loginEmail || !loginPassword"
-                class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
-              >
-                <span v-if="!isLoggingIn">Se connecter</span>
-                <span v-else class="flex items-center justify-center gap-2">
-                  <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Connexion...
-                </span>
-              </button>
-
-              <button
-                @click="signUp"
-                :disabled="isLoggingIn || !loginEmail || !loginPassword"
-                class="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
-              >
-                <span v-if="!isLoggingIn">S'inscrire</span>
-                <span v-else class="flex items-center justify-center gap-2">
-                  <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Inscription...
-                </span>
-              </button>
-            </div>
-
-            <button
-              @click="cancelLogin"
-              :disabled="isLoggingIn"
-              class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
-            >
-              Annuler
-            </button>
-          </div>
-
-          <div class="pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
-            <p><strong>Première fois ?</strong> Cliquez sur "S'inscrire" pour créer un compte.</p>
-          </div>
+        <div class="mt-4 text-xs text-gray-500">
+          <p><strong>Première fois ?</strong> Cliquez sur "S'inscrire" pour créer un compte.</p>
+          <p><strong>Mot de passe oublié ?</strong> Contactez le support.</p>
         </div>
       </div>
     </div>
 
-    <!-- Popup de confirmation pour migration vers Firebase -->
+    <!-- Modal de confirmation pour migration vers Firebase -->
     <div
       v-if="showMigrationModal"
-      class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
-      @click.self="cancelMigration"
+      class="bg-white fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div
-        class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-auto overflow-y-auto max-h-[90vh] animate-slideIn"
-      >
-        <!-- Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-200">
-          <h4 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            🔄 Migration vers Firebase
-          </h4>
-          <button
-            @click="cancelMigration"
-            class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
-            :disabled="isProcessing"
-          >
-            ×
-          </button>
+      <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+        <h4 class="text-lg font-semibold text-gray-800 mb-4">🔄 Migration vers Firebase</h4>
+
+        <div class="mb-4">
+          <p class="text-gray-700 mb-3">
+            Vous avez <strong>{{ periodsCount }} période(s)</strong> enregistrée(s) localement.
+          </p>
+          <p class="text-gray-700 mb-4">Que souhaitez-vous faire avec ces données ?</p>
         </div>
 
-        <!-- Content -->
-        <div class="p-6 space-y-4">
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p class="text-blue-900 font-medium mb-2">📊 Données existantes détectées</p>
-            <p class="text-blue-800 text-sm">
-              Vous avez <strong>{{ periodsCount }} période(s)</strong> enregistrée(s) localement.
-            </p>
-          </div>
-
-          <p class="text-gray-800">Que souhaitez-vous faire avec ces données ?</p>
-
-          <div class="space-y-3">
-            <!-- Option 1: Transférer les données -->
-            <button
-              @click="confirmMigrationWithData"
-              :disabled="isProcessing"
-              class="w-full p-4 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-lg transition-colors text-left group"
-            >
-              <div class="flex items-center gap-3">
-                <div class="text-2xl group-hover:scale-110 transition-transform">📤</div>
-                <div class="flex-1">
-                  <div class="font-medium text-blue-900">Transférer vers Firebase</div>
-                  <div class="text-sm text-blue-700 mt-1">
-                    Copier toutes les données locales vers le cloud
-                  </div>
+        <div class="space-y-3">
+          <!-- Option 1: Transférer les données -->
+          <button
+            @click="confirmMigrationWithData"
+            :disabled="isProcessing"
+            class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium text-left"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-xl">📤</span>
+              <div>
+                <div class="font-medium">Transférer vers Firebase</div>
+                <div class="text-sm opacity-90">
+                  Copier toutes les données locales vers le cloud
                 </div>
               </div>
-            </button>
+            </div>
+          </button>
 
-            <!-- Option 2: Commencer à zéro -->
-            <button
-              @click="confirmMigrationWithoutData"
-              :disabled="isProcessing"
-              class="w-full p-4 bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 hover:border-yellow-300 rounded-lg transition-colors text-left group"
-            >
-              <div class="flex items-center gap-3">
-                <div class="text-2xl group-hover:scale-110 transition-transform">🆕</div>
-                <div class="flex-1">
-                  <div class="font-medium text-yellow-900">Commencer à zéro</div>
-                  <div class="text-sm text-yellow-700 mt-1">
-                    Ignorer les données locales et démarrer une nouvelle base
-                  </div>
+          <!-- Option 2: Commencer à zéro -->
+          <button
+            @click="confirmMigrationWithoutData"
+            :disabled="isProcessing"
+            class="w-full px-4 py-3 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg hover:bg-yellow-200 font-medium text-left"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-xl">🆕</span>
+              <div>
+                <div class="font-medium">Commencer à zéro</div>
+                <div class="text-sm opacity-90">
+                  Ignorer les données locales et démarrer une nouvelle base
                 </div>
               </div>
-            </button>
-          </div>
+            </div>
+          </button>
 
           <!-- Annuler -->
-          <div class="pt-4 border-t border-gray-200">
-            <button
-              @click="cancelMigration"
-              :disabled="isProcessing"
-              class="w-full px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 font-medium transition-colors"
-            >
-              Annuler
-            </button>
-          </div>
+          <button
+            @click="cancelMigration"
+            :disabled="isProcessing"
+            class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+          >
+            Annuler
+          </button>
         </div>
       </div>
     </div>
+
     <!-- Boutons d'action -->
     <div class="space-y-3">
       <!-- Appliquer les changements -->
@@ -282,29 +199,12 @@
         v-if="selectedStorageType !== currentStorageType"
         @click="applyStorageChange"
         :disabled="isProcessing"
-        class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
+        class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
       >
         <span v-if="!isProcessing">
           Passer au stockage {{ selectedStorageType === 'local' ? 'local' : 'en ligne' }}
         </span>
-        <span v-else class="flex items-center justify-center gap-2">
-          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          Migration en cours...
-        </span>
+        <span v-else>Migration en cours...</span>
       </button>
 
       <!-- Actions pour stockage local uniquement -->
@@ -317,7 +217,7 @@
           <!-- Export -->
           <button
             @click="exportData"
-            class="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-lg text-sm font-medium transition-colors"
+            class="flex items-center justify-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition"
           >
             📤 Exporter
           </button>
@@ -325,7 +225,7 @@
           <!-- Import -->
           <button
             @click="triggerImport"
-            class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-sm font-medium transition-colors"
+            class="flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition"
           >
             📥 Importer
           </button>
@@ -343,13 +243,8 @@
     </div>
 
     <!-- Messages d'état -->
-    <div v-if="statusMessage" class="mt-4 p-4 rounded-lg text-sm border" :class="statusClass">
-      <div class="flex items-start gap-2">
-        <span v-if="statusMessage.includes('✅')" class="text-lg">✅</span>
-        <span v-else-if="statusMessage.includes('❌')" class="text-lg">❌</span>
-        <span v-else class="text-lg">ℹ️</span>
-        <span class="flex-1">{{ statusMessage }}</span>
-      </div>
+    <div v-if="statusMessage" class="mt-4 p-3 rounded text-sm" :class="statusClass">
+      {{ statusMessage }}
     </div>
 
     <!-- Section utilisateur connecté Firebase -->
@@ -358,37 +253,31 @@
 
       <div
         v-if="storageService.isUserConnected()"
-        class="bg-green-50 border border-green-200 rounded-lg p-4"
+        class="bg-green-50 border border-green-200 rounded-lg p-3"
       >
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="text-2xl">✅</div>
-            <div>
-              <div class="font-medium text-green-800">Connecté</div>
-              <div class="text-sm text-green-600">{{ storageService.getCurrentUserEmail() }}</div>
-            </div>
+          <div>
+            <div class="text-sm font-medium text-green-800">✅ Connecté</div>
+            <div class="text-xs text-green-600">{{ storageService.getCurrentUserEmail() }}</div>
           </div>
           <button
             @click="signOut"
-            class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+            class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
           >
             Déconnexion
           </button>
         </div>
       </div>
 
-      <div v-else class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+      <div v-else class="bg-orange-50 border border-orange-200 rounded-lg p-3">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="text-2xl">⚠️</div>
-            <div>
-              <div class="font-medium text-orange-800">Non connecté</div>
-              <div class="text-sm text-orange-600">Connexion requise pour la synchronisation</div>
-            </div>
+          <div>
+            <div class="text-sm font-medium text-orange-800">⚠️ Non connecté</div>
+            <div class="text-xs text-orange-600">Connexion requise pour la synchronisation</div>
           </div>
           <button
             @click="openLoginModal"
-            class="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Se connecter
           </button>
@@ -397,41 +286,6 @@
     </div>
   </div>
 </template>
-
-<style scoped>
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Amélioration du focus pour l'accessibilité */
-input:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-}
-
-button:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Spinner personnalisé */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-</style>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
@@ -468,16 +322,13 @@ const currentUser = ref<any>(null)
 
 // Classes CSS pour les messages
 const statusClass = computed<string>(() => {
-  if (statusMessage.value.includes('❌') || statusMessage.value.includes('Erreur')) {
-    return 'bg-red-50 border-red-200 text-red-800'
+  if (statusMessage.value.includes('Erreur') || statusMessage.value.includes('Échec')) {
+    return 'bg-red-100 border border-red-300 text-red-800'
   }
-  if (statusMessage.value.includes('✅')) {
-    return 'bg-green-50 border-green-200 text-green-800'
-  }
-  return 'bg-blue-50 border-blue-200 text-blue-800'
+  return 'bg-green-100 border border-green-300 text-green-800'
 })
 
-// ✅ FONCTION: Ouvrir la modal de connexion
+// ✅ NOUVELLE FONCTION: Ouvrir la modal de connexion
 const openLoginModal = (): void => {
   showLoginModal.value = true
   loginError.value = ''
@@ -485,7 +336,7 @@ const openLoginModal = (): void => {
   loginPassword.value = ''
 }
 
-// ✅ FONCTION: Fermer la modal de connexion
+// ✅ NOUVELLE FONCTION: Fermer la modal de connexion
 const cancelLogin = (): void => {
   showLoginModal.value = false
   loginError.value = ''
@@ -497,7 +348,7 @@ const cancelLogin = (): void => {
   }
 }
 
-// ✅ FONCTION: Se connecter
+// ✅ NOUVELLE FONCTION: Se connecter
 const signIn = async (): Promise<void> => {
   if (!loginEmail.value || !loginPassword.value) {
     loginError.value = 'Veuillez remplir tous les champs'
@@ -524,7 +375,7 @@ const signIn = async (): Promise<void> => {
   }
 }
 
-// ✅ FONCTION: S'inscrire
+// ✅ NOUVELLE FONCTION: S'inscrire
 const signUp = async (): Promise<void> => {
   if (!loginEmail.value || !loginPassword.value) {
     loginError.value = 'Veuillez remplir tous les champs'
@@ -556,7 +407,7 @@ const signUp = async (): Promise<void> => {
   }
 }
 
-// ✅ FONCTION: Se déconnecter
+// ✅ NOUVELLE FONCTION: Se déconnecter
 const signOut = async (): Promise<void> => {
   try {
     await firebaseSignOut(auth)
@@ -571,7 +422,7 @@ const signOut = async (): Promise<void> => {
   }
 }
 
-// ✅ FONCTION: Messages d'erreur Firebase
+// ✅ NOUVELLE FONCTION: Messages d'erreur Firebase
 const getErrorMessage = (errorCode: string): string => {
   switch (errorCode) {
     case 'auth/user-not-found':
@@ -597,7 +448,7 @@ const applyStorageChange = async (): Promise<void> => {
     return
   }
 
-  // Si on passe à Firebase et qu'on n'est pas connecté
+  // ✅ MODIFICATION: Si on passe à Firebase et qu'on n'est pas connecté
   if (selectedStorageType.value === 'firebase' && !storageService.isUserConnected()) {
     openLoginModal()
     return
@@ -729,7 +580,7 @@ const loadPeriodsCount = async (): Promise<void> => {
 // Exposer storageService pour le template
 defineExpose({ storageService })
 
-// Écouter les changements d'authentification
+// ✅ NOUVEAU: Écouter les changements d'authentification
 onMounted(() => {
   loadPeriodsCount()
 

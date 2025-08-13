@@ -187,6 +187,7 @@
 
           <div class="pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
             <p><strong>Première fois ?</strong> Cliquez sur "S'inscrire" pour créer un compte.</p>
+            <p><strong>Mot de passe oublié ?</strong> Contactez le support.</p>
           </div>
         </div>
       </div>

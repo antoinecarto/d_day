@@ -52,8 +52,8 @@
     <!-- Popup de connexion Firebase -->
     <div
       v-if="showLoginModal"
-      class="bg-white p-6 space-y-4"
-      style="background: rgba(0, 0, 0, 0); backdrop-filter: blur(4px)"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px)"
       @click.self="cancelLogin"
     >
       <div
@@ -78,7 +78,7 @@
         <div class="p-6 space-y-4">
           <p class="text-gray-600">Vous devez vous connecter pour utiliser le stockage en ligne.</p>
 
-          <div class="p-6 space-y-4">
+          <div class="space-y-4">
             <div>
               <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -187,6 +187,7 @@
 
           <div class="pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
             <p><strong>Première fois ?</strong> Cliquez sur "S'inscrire" pour créer un compte.</p>
+            <p><strong>Mot de passe oublié ?</strong> Contactez le support.</p>
           </div>
         </div>
       </div>
@@ -195,7 +196,7 @@
     <!-- Popup de confirmation pour migration vers Firebase -->
     <div
       v-if="showMigrationModal"
-      class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+      class="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm z-[9999]"
       @click.self="cancelMigration"
     >
       <div

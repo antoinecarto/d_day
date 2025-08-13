@@ -75,7 +75,7 @@
         </div>
         <button
           @click="showSettings = !showSettings"
-          class="px-4 py-2 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded-full text-sm font-semibold shadow hover:opacity-90 transition"
+          class="popup px-4 py-2 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded-full text-sm font-semibold shadow hover:opacity-90 transition"
         >
           ⚙️ Paramètres
         </button>
@@ -399,7 +399,6 @@ onMounted(() => {
   z-index: 100;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  color: black !important;
 }
 .dot {
   height: 12px;

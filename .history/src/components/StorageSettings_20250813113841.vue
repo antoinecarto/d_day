@@ -53,7 +53,7 @@
     <div
       v-if="showLoginModal"
       class="bg-white p-6 space-y-4"
-      style="background: rgba(0, 0, 0, 0); backdrop-filter: blur(4px)"
+      style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px)"
       @click.self="cancelLogin"
     >
       <div
@@ -187,6 +187,7 @@
 
           <div class="pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
             <p><strong>Première fois ?</strong> Cliquez sur "S'inscrire" pour créer un compte.</p>
+            <p><strong>Mot de passe oublié ?</strong> Contactez le support.</p>
           </div>
         </div>
       </div>
