@@ -100,9 +100,10 @@
           </p>
         </div>
         <!-- Durée moyenne calculée -->
+        <!-- Durée moyenne calculée -->
         <div
           v-if="averageCycleDuration"
-          class="bg-blue-50 rounded-lg shadow-md p-4 border-blue-400"
+          class="bg-blue-50 rounded-lg shadow-md p-4 border-l-4 border-blue-400"
         >
           <div class="flex items-center justify-between">
             <div>
@@ -110,19 +111,12 @@
                 📊 Durée moyenne de vos cycles
               </h3>
               <p class="text-xs text-blue-600">
-                <template v-if="allPeriods.length <= 2">
-                  ℹ️ Calcul de la moyenne à partir du troisième cycle.
-                </template>
-                <template v-else>
-                  Calculée à partir de vos
-                  {{ Math.min(7, allPeriods.length) - 1 }}
-                  derniers cycles
-                </template>
+                Calculée à partir de vos
+                {{ Math.min(7, allPeriods.length) > 1 ? Math.min(7, allPeriods.length) - 1 : 0 }}
+                derniers cycles
               </p>
             </div>
-
-            <!-- Afficher la durée moyenne uniquement si > 2 périodes -->
-            <div class="text-right" v-if="allPeriods.length > 2">
+            <div class="text-right">
               <span class="text-2xl font-bold text-blue-700">{{ averageCycleDuration }}</span>
               <span class="text-sm text-blue-600 ml-1"> jours</span>
             </div>
@@ -385,8 +379,8 @@ const averageCycleDuration = ref(null)
 const calculateAverageCycle = (periods) => {
   if (periods.length < 2) return null
 
-  // Prendre seulement les 7 dernières périodes (donc 6 cycles maximum)
-  const recentPeriods = periods.slice(0, 7)
+  // Prendre seulement les 6 dernières périodes (donc 5 cycles maximum)
+  const recentPeriods = periods.slice(0, 6)
 
   const durations = []
   for (let i = 0; i < recentPeriods.length - 1; i++) {

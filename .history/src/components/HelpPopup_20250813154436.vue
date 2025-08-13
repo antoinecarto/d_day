@@ -96,14 +96,14 @@
                   <span class="text-pink-500 mt-1">•</span>
                   <span
                     ><strong>Durée du cycle personnalisable :</strong> Ajustez la durée de votre
-                    cycle dans les paramètres (20-40 jours), 28 jours par défaut</span
+                    cycle dans les paramètres (20-40 jours)</span
                   >
                 </div>
                 <div class="flex items-start gap-2">
                   <span class="text-pink-500 mt-1">•</span>
                   <span
-                    ><strong>Suppression :</strong> Allez dans "Périodes enregistrées" et cliquez
-                    sur l'icone ❌"</span
+                    ><strong>Suppression :</strong> Allez dans "Périodes enregistrées et cliquez sur
+                    l'icone ❌"</span
                   >
                 </div>
                 <div class="flex items-start gap-2">
@@ -139,17 +139,17 @@
                 <p class="flex items-start gap-2">
                   <span class="mt-1">•</span>
                   <span
-                    >Enregistrez régulièrement le début de vos règles pour un calcul de la moyenne
-                    plus précis.</span
+                    >Enregistrez régulièrement le début de vos règles pour des prédictions plus
+                    précises</span
                   >
                 </p>
                 <p class="flex items-start gap-2">
                   <span class="mt-1">•</span>
-                  <span>La moyenne est calculée sur les 6 derniers cycles.</span>
+                  <span>Les prédictions s'améliorent avec le temps et plus de données</span>
                 </p>
                 <p class="flex items-start gap-2">
                   <span class="mt-1">•</span>
-                  <span>N'hésitez pas à ajuster la durée de votre cycle si elle change.</span>
+                  <span>N'hésitez pas à ajuster la durée de votre cycle si elle change</span>
                 </p>
               </div>
             </section>

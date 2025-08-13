@@ -140,7 +140,7 @@
                   <span class="mt-1">•</span>
                   <span
                     >Enregistrez régulièrement le début de vos règles pour un calcul de la moyenne
-                    plus précis.</span
+                    plus précis</span
                   >
                 </p>
                 <p class="flex items-start gap-2">
@@ -149,7 +149,7 @@
                 </p>
                 <p class="flex items-start gap-2">
                   <span class="mt-1">•</span>
-                  <span>N'hésitez pas à ajuster la durée de votre cycle si elle change.</span>
+                  <span>N'hésitez pas à ajuster la durée de votre cycle si elle change</span>
                 </p>
               </div>
             </section>

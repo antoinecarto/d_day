@@ -99,35 +99,6 @@
             La nouvelle durée s'appliquera aux prochains cycles enregistrés.
           </p>
         </div>
-        <!-- Durée moyenne calculée -->
-        <div
-          v-if="averageCycleDuration"
-          class="bg-blue-50 rounded-lg shadow-md p-4 border-blue-400"
-        >
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-sm font-semibold text-blue-800 mb-1">
-                📊 Durée moyenne de vos cycles
-              </h3>
-              <p class="text-xs text-blue-600">
-                <template v-if="allPeriods.length <= 2">
-                  ℹ️ Calcul de la moyenne à partir du troisième cycle.
-                </template>
-                <template v-else>
-                  Calculée à partir de vos
-                  {{ Math.min(7, allPeriods.length) - 1 }}
-                  derniers cycles
-                </template>
-              </p>
-            </div>
-
-            <!-- Afficher la durée moyenne uniquement si > 2 périodes -->
-            <div class="text-right" v-if="allPeriods.length > 2">
-              <span class="text-2xl font-bold text-blue-700">{{ averageCycleDuration }}</span>
-              <span class="text-sm text-blue-600 ml-1"> jours</span>
-            </div>
-          </div>
-        </div>
         <!-- Liste des périodes -->
         <h3 class="text-md font-semibold text-gray-700 mb-2">Périodes enregistrées :</h3>
         <div
@@ -385,13 +356,10 @@ const averageCycleDuration = ref(null)
 const calculateAverageCycle = (periods) => {
   if (periods.length < 2) return null
 
-  // Prendre seulement les 7 dernières périodes (donc 6 cycles maximum)
-  const recentPeriods = periods.slice(0, 7)
-
   const durations = []
-  for (let i = 0; i < recentPeriods.length - 1; i++) {
-    const current = recentPeriods[i].startDate
-    const next = recentPeriods[i + 1].startDate
+  for (let i = 0; i < periods.length - 1; i++) {
+    const current = periods[i].startDate
+    const next = periods[i + 1].startDate
     const diff = Math.floor((current - next) / (1000 * 60 * 60 * 24)) // en jours
     durations.push(diff)
   }

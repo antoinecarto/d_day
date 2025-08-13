@@ -111,7 +111,7 @@
               </h3>
               <p class="text-xs text-blue-600">
                 <template v-if="allPeriods.length <= 2">
-                  ℹ️ Calcul de la moyenne à partir du troisième cycle.
+                  ℹ️ Nous calculons la moyenne à partir du troisième cycle.
                 </template>
                 <template v-else>
                   Calculée à partir de vos

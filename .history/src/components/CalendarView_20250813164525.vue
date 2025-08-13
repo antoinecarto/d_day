@@ -109,9 +109,11 @@
               <h3 class="text-sm font-semibold text-blue-800 mb-1">
                 📊 Durée moyenne de vos cycles
               </h3>
+
+              <!-- Message conditionnel -->
               <p class="text-xs text-blue-600">
-                <template v-if="allPeriods.length <= 2">
-                  ℹ️ Calcul de la moyenne à partir du troisième cycle.
+                <template v-if="allPeriods.length === 2">
+                  ℹ️ Nous calculons la moyenne à partir du troisième cycle.
                 </template>
                 <template v-else>
                   Calculée à partir de vos
@@ -121,8 +123,7 @@
               </p>
             </div>
 
-            <!-- Afficher la durée moyenne uniquement si > 2 périodes -->
-            <div class="text-right" v-if="allPeriods.length > 2">
+            <div class="text-right">
               <span class="text-2xl font-bold text-blue-700">{{ averageCycleDuration }}</span>
               <span class="text-sm text-blue-600 ml-1"> jours</span>
             </div>
